@@ -1,76 +1,110 @@
 ﻿namespace AaUS2
 {
-    public class AVLTree<TKey, TValue> : BinarySearchTree<TKey, TValue> where TKey : IComparable<TKey>
+    public class AVLTree<T> : BinarySearchTree<T> where T : IComparable<T>
     {
-        public class AVLNode(TKey key, TValue value) : BSTNode(key, value)
+        /**
+         * Struct to represent AVL tree node.
+         */
+        public class AVLNode(T data) : BSTNode(data)
         {
-            public int Height { get; set; } = 1;
+            public int Height { get; set; }
         }
 
         /**
-         * Returns new AVL node.
+         * AVL implementation of remove operation.
          */
-        protected override BSTNode CreateNode(TKey key, TValue value)
+        public override void Remove(T key)
         {
-            return new AVLNode(key, value);
+            base.Remove(key);
+            BalanceTree();
         }
 
         /**
-         * AVL implementation of Insert - classic BST Insert plus rebalance.
+         * Returns newly created AVL node.
          */
-        protected override BSTNode InsertNode(TKey key, TValue value)
+        protected override BSTNode CreateNode(T data)
         {
-            var node = (AVLNode)base.InsertNode(key, value);
-            //rebalance
-            return node; 
+            return new AVLNode(data); 
         }
 
         /**
-         * AVL implementation of Remove operation.
+         * AVL implementation of insert operation.
          */
-        public override TValue Remove(TKey key)
+        protected override BSTNode InsertNode(T data)
         {
-            return base.Remove(key);
+            var node = (AVLNode)base.InsertNode(data);
+            BalanceTree();
+            return node;
         }
 
         /**
-         * Performs left rotation of the node.
+         * Operation to balance tree if needed.
          */
-        protected void RotateLeft(AVLNode node)
+        private void BalanceTree()
         {
+            //start by parent of inserted/removed node
+            //climb up until root
+            //if bf > +- 2, perform needed rotation(s)
+        }
+
+        /**
+         * Performs left rotation.
+         */
+        private void RotateLeft(AVLNode node)
+        {
+            var leftSon = node.Left;
             var parent = node.Parent;
-            var grandparent = parent?.Parent;
-            var left = node.Left;
-            if (grandparent != null) // non-root case
+            var grandparent = parent!.Parent;
+            if (grandparent != null)
             {
                 if (grandparent.Left == parent)
                 {
                     grandparent.Left = node;
+                    node.Parent = grandparent;
                 }
                 else
                 {
                     grandparent.Right = node;
+                    node.Parent = grandparent;  
                 }
             }
-            else
+            parent.Right = leftSon;
+            if (leftSon != null)
             {
-                Root = node;
-                Root.Parent = null;
+                leftSon.Parent = parent;
             }
-            parent.Right = left;
             node.Left = parent;
-
-            left.Parent = parent;
             parent.Parent = node;
-            node.Parent = grandparent;
         }
 
         /**
-         * Performs right rotation of the node.
+         * Performs right rotation.
          */
-        protected void RotateRight(AVLNode node)
+        private void RotateRight(AVLNode node)
         {
-
+            var rightSon = node.Right;
+            var parent = node.Parent;
+            var grandparent = parent!.Parent;
+            if (grandparent != null)
+            {
+                if (grandparent.Left == parent)
+                {
+                    grandparent.Left = node;
+                    node.Parent = grandparent;
+                }
+                else
+                {
+                    grandparent.Right = node;
+                    node.Parent = grandparent;
+                }
+            }
+            parent.Left = rightSon;
+            if (rightSon != null)
+            {
+                rightSon.Parent = parent;
+            }
+            node.Right = parent;
+            parent.Parent = node;
         }
     }
 }

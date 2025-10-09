@@ -1,142 +1,186 @@
 ﻿namespace AaUS2
 {
-    public class BinarySearchTree<TKey, TValue> where TKey : IComparable<TKey> 
+    public class BinarySearchTree<T> where T : IComparable<T>
     {
         /**
-         * Struct to keep information about the node of binary search tree.
+         * BST Node struct.
          */
-        public class BSTNode(TKey key, TValue value)
+        public class BSTNode(T data)
         {
-            public TKey Key { get; set; } = key;
-            public TValue Value { get; set; } = value; 
+            public T Data { get; set; } = data;
 
             public BSTNode? Parent { get; set; }
             public BSTNode? Left { get; set; }
             public BSTNode? Right { get; set; }
         }
-        //-------
 
-        public BSTNode? Root { get; set; }
-
-        /**
-         * Performs Insert operation, needed for subclasses with different node types.
-         */
-        public void Insert(TKey key, TValue value) { InsertNode(key, value); }
+        public BSTNode? Root { get; set; } = null;
+        public int Size { get; private set; } = 0;
 
         /**
-         * Performs BST find operation.
+         * Public operation to call insert.
          */
-        public BSTNode Find(TKey key)
+        public void Insert(T data)
         {
-            if (Root == null)
-            {
-                throw new InvalidOperationException("T? Find -> BST is empty!");
-            }
-            var current = Root;
-            // go until either leaf or find matching key
-            while (current != null && key.CompareTo(current.Key) != 0)
-            {
-                current = key.CompareTo(current.Key) < 0 ? current.Left : current.Right;
-            }
-
-            return current ?? throw new ArgumentException("T? find -> No such key!");
+            InsertNode(data);
         }
 
         /**
-         * Performs BST remove operation (subclasses could override this).
+         * BST Find operation implementation.
+         * Returns element by key or throws an exception if key does not exist.
          */
-        public virtual TValue Remove(TKey key)
+        public BSTNode Find(T key) 
         {
-            BSTNode node = Find(key);
-            var result = node.Value; 
-            var parent = node.Parent; 
-            switch (Degree(node))
+            var current = Root;
+            while (current != null && key.CompareTo(current.Data) != 0)
+            {
+                if (key.CompareTo(current.Data) < 0)
+                {
+                    current = current.Left;
+                }
+                else
+                {
+                    current = current.Right;
+                }
+            }
+
+            return current ?? throw new ArgumentException("BST::Find -> No such key!");
+        }
+
+        /**
+         * General BST remove implementation.
+         * Throws an exception if key does not exist.
+         */
+        public virtual void Remove(T key)
+        { 
+            var nodeToRemove = Find(key);
+            var parent = nodeToRemove.Parent;
+            switch (Degree(nodeToRemove))
             {
                 case 0:
-                    // if node is root, just set to null
-                    if (node == Root)
+                    if (IsRoot(nodeToRemove))
                     {
                         Root = null;
-                        break;
                     }
-                    if (parent != null)
+                    else if (IsLeftSon(nodeToRemove))
                     {
-                        // check if node was left or right son
-                        if (node.Key.CompareTo(parent.Key) < 0)
-                        {
-                            parent.Left = null;
-                        }
-                        else
-                        {
-                            parent.Right = null;
-                        }
+                        parent!.Left = null;
+                    }
+                    else
+                    {
+                        parent!.Right = null;
                     }
                     break;
                 case 1:
-                    var son = node.Left ?? node.Right;
-                    // if node is root, then son would be new root
-                    if (node == Root)
+                    var son = nodeToRemove.Left ?? nodeToRemove.Right;
+                    if (IsRoot(nodeToRemove))
                     {
                         Root = son;
+                        son!.Parent = null;
                         break;
                     }
-                    if (parent != null)
+                    
+                    if (IsLeftSon(nodeToRemove))
                     {
-                        // check if parent would link with left or right son of node
-                        if (node.Key.CompareTo(parent.Key) < 0)
-                        {
-                            node.Left = null;
-                            parent.Left = son;
-                        }
-                        else
-                        {
-                            node.Right = null;
-                            parent.Right = son;
-                        }
+                        parent!.Left = son;
                     }
-                    // link son with parent
-                    if (son != null)
+                    else
                     {
-                        son.Parent = parent;
+                        parent!.Right = son;
                     }
+
+                    son!.Parent = parent;
+                    nodeToRemove.Parent = null;
+                    nodeToRemove.Left = null;
+                    nodeToRemove.Right = null;
+
                     break;
                 case 2:
                     // find prevInOrder
-                    // copy prevInOrder data to node
-                    // remove prevInOrder normally
-                    BSTNode prevInOrder = node.Right!;
-                    while (prevInOrder.Left != null)
+                    // switch data
+                    // remove node normally (now either case 0 or case 1)
+                    var current = nodeToRemove.Left;
+                    BSTNode? nextInOrder = null;
+                    while (current != null)
                     {
-                        prevInOrder = prevInOrder.Left;
+                        nextInOrder = current;
+                        current = current.Right;
                     }
-                    node.Key = prevInOrder.Key;
-                    node.Value = prevInOrder.Value;
-                    Remove(prevInOrder.Key);
+
+                    var tmp = nextInOrder!.Data;
+                    nextInOrder.Data = nodeToRemove.Data;
+                    nodeToRemove.Data = tmp;
+
+                    Remove(nextInOrder.Data);
                     break;
             }
-            return result;
-        }
+        } 
 
         /**
-         * Virtual operation to create correct node type (used for Insert()). 
+         * Operation to do InOrder traversal from certain node.
          */
-        protected virtual BSTNode CreateNode(TKey key, TValue value)
+        public void ProcessInOrder(BSTNode? node, Action<BSTNode> operation)
         {
-            return new BSTNode(key, value);
-        }
-
-        /**
-         * Base implementation of BST insert (subclasses could override this). 
-         */
-        protected virtual BSTNode InsertNode(TKey key, TValue value)
-        {
-            BSTNode newNode = CreateNode(key, value);
-            if (Root != null)
+            if (node != null)
             {
-                var parent = FindParent(key);
-                if (parent == null) throw new ArgumentException("Tree already contains such key!");
+                ProcessInOrder(node.Left, operation);
+                operation(node);
+                ProcessInOrder(node.Right, operation);
+            }
+        }
+
+        /**
+         * Operation to do LevelOrder traversal from param node.
+         */
+        public void ProcessLevelOrder(BSTNode node, Action<BSTNode> operation)
+        {
+            LinkedList<BSTNode> list = new LinkedList<BSTNode>();
+            list.AddFirst(node);
+            while (list.Count > 0)
+            {
+                BSTNode current = list.First.Value;
+                operation(current);
+                list.RemoveFirst();
+                var leftSon = current.Left;
+                var rightSon = current.Right;
+                if (leftSon != null) list.AddLast(leftSon);
+                if (rightSon != null) list.AddLast(rightSon);
+            }
+        }
+
+        /**
+         * General BST insertion. Could be void :D.
+         */
+        protected virtual BSTNode InsertNode(T data)
+        {
+            var newNode = CreateNode(data);
+            if (Root == null)
+            {
+                Root = newNode;
+            }
+            else
+            {
+                var current = Root;
+                BSTNode? parent = null;
+                while (current != null)
+                {
+                    parent = current;
+                    var cmpResult = data.CompareTo(current.Data);
+                    if (cmpResult < 0)
+                    {
+                        current = current.Left;
+                    }
+                    else if (cmpResult > 0)
+                    {
+                        current = current.Right;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("BST::Insert -> Table already contains such key!");
+                    }
+                }
                 newNode.Parent = parent;
-                if (key.CompareTo(parent.Key) < 0)
+                if (data.CompareTo(parent!.Data) < 0)
                 {
                     parent.Left = newNode;
                 }
@@ -145,54 +189,52 @@
                     parent.Right = newNode;
                 }
             }
-            else
-            {
-                Root = newNode;
-            }
             return newNode;
         }
 
         /**
-         * Operation to find parent of newly added node before insertion.
+         * Returns newly created node.
+         * Virtual to be overriden by subclasses (to return correct node type).
          */
-        public BSTNode? FindParent(TKey key)
+        protected virtual BSTNode CreateNode(T data)
         {
-            BSTNode? parent = null;
-            var current = Root; 
-            while (current != null)
-            {
-                parent = current;
-                if (key.CompareTo(current.Key) < 0)
-                {
-                    current = current.Left;
-                }
-                else if (key.CompareTo(current.Key) > 0)
-                {
-                    current = current.Right;
-                }
-                else
-                {
-                    // or return null;
-                    throw new ArgumentException("BSTNode<K, T>?::FindParent -> BST already contains such key!");
-                }
-            }
-            return parent;
+            return new BSTNode(data);
         }
 
         /**
-         * Aside operation to get the degree of the node. 
+         * Checks if node is left son.
          */
-        protected int Degree(BSTNode node)
+        private bool IsLeftSon(BSTNode node)
+        {
+            var parent = node.Parent;
+            return parent != null && parent.Left == node;
+        }
+
+        /**
+         * Checks if node is right son.
+         */
+        private bool IsRightSon(BSTNode node)
+        {
+            var parent = node.Parent;
+            return parent != null && parent.Right == node;
+        }
+
+        /**
+         * Checks if node is a root.
+         */
+        private bool IsRoot(BSTNode node)
+        {
+            return node == Root;
+        }
+
+        /**
+         * Returns degree of the param node.
+         */
+        private int Degree(BSTNode node)
         {
             int result = 0;
-            if (node.Left != null)
-            {
-                ++result;
-            }
-            if (node.Right != null)
-            {
-                ++result;
-            }
+            if (node.Left != null) ++result;
+            if (node.Right != null) ++result;
             return result;
         }
     }

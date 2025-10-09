@@ -1,6 +1,5 @@
 ﻿using AaUS2;
 using System.Diagnostics;
-using System.Threading;
 
 namespace AaUS2_console 
 {
@@ -8,10 +7,10 @@ namespace AaUS2_console
     {
         static void Main(String[] args)
         {
-            var tree = new BinarySearchTree<int, int>();
+            var tree = new BinarySearchTree<int>();
 
             Random r = new Random(DateTime.Now.Microsecond);
-            int count = 5000000;
+            int count = 10000000;
             var keys = Enumerable.Range(0, count).ToList();
             keys = keys.OrderBy(x => r.Next()).ToList();
 
@@ -20,7 +19,7 @@ namespace AaUS2_console
 
             for (int i = 0; i < count; ++i)
             {
-                tree.Insert(keys[i], i + 1);
+                tree.Insert(keys[i]);
             }
 
             sw.Stop();
