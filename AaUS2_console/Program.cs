@@ -8,20 +8,22 @@ namespace AaUS2_console
         static void Main(String[] args)
         {
             var tree = new BinarySearchTree<int>();
-
-            Random r = new Random(DateTime.Now.Microsecond);
+            Random r = new Random(42);
             int count = 10000000;
-            var keys = Enumerable.Range(0, count).ToList();
-            keys = keys.OrderBy(x => r.Next()).ToList();
 
-            var sw = Stopwatch.StartNew();
-            Console.WriteLine("Stopwatch started");
-
-            for (int i = 0; i < count; ++i)
+            var keys = Enumerable.Range(0, count).ToArray();
+            for (int i = count - 1; i > 0; i--)
             {
-                tree.Insert(keys[i]);
+                int j = r.Next(i + 1);
+                (keys[i], keys[j]) = (keys[j], keys[i]);
             }
 
+            Console.WriteLine("Shuffled.");
+            var sw = Stopwatch.StartNew();
+            foreach (int k in keys)
+            {
+                tree.Insert(k);
+            }
             sw.Stop();
             Console.WriteLine("BST::Insert time elapsed: " + sw.Elapsed);
         }
