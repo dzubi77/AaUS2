@@ -2,6 +2,9 @@
 {
     public class BinarySearchTree<T> where T : IComparable<T>
     {
+        /**
+         * Class to represent BST node.
+         */
         public class BSTNode
         {
             public T Data { get; set; } 
@@ -18,11 +21,17 @@
         public BSTNode? Root { get; set; } = null; 
         public int Size { get; private set; } = 0;
 
+        /**
+         * General call for BST insert. 
+         */
         public void Insert(T value)
         {
             InsertNode(value);
         }
 
+        /**
+         * BST find operation implementation.
+         */
         public BSTNode Find(T value)
         {
             var current = Root;
@@ -42,72 +51,18 @@
             return current ?? throw new ArgumentException("BST::find -> No such key!");
         }
 
+        /**
+         * BST remove implementation. Subclasses would override it.
+         */
         public virtual void Remove(T value)
         {
             var nodeToRemove = Find(value);
-            var parent = nodeToRemove.Parent;
-            switch (Degree(nodeToRemove))
-            {
-                case 0:
-                    //if root, set root to null
-                    //else remove connections parent-son
-                    if (parent == null)
-                    {
-                        Root = null;
-                    }
-                    else
-                    {
-                        if (IsLeftSon(nodeToRemove))
-                        {
-                            parent.Left = null;
-                        }
-                        else
-                        {
-                            parent.Right = null;
-                        }
-                        nodeToRemove.Parent = null;
-                    }
-                    break;
-                case 1:
-                    //if root, son would be new root
-                    //else connect node's parent with node's son
-                    var son = nodeToRemove.Left ?? nodeToRemove.Right;
-                    if (parent == null)
-                    {
-                        Root = son;
-                        son!.Parent = null;
-                    }
-                    else
-                    {
-                        if (IsLeftSon(nodeToRemove))
-                        {
-                            parent.Left = son;
-                        }
-                        else
-                        {
-                            parent.Right = son;
-                        }
-                        son!.Parent = parent;
-                        nodeToRemove.Parent = null;
-                    }
-                    break;
-                case 2:
-                    //find prevInOrder
-                    //swap data
-                    //remove normally (degree would be 0 or 1)
-                    var prevInOrder = nodeToRemove.Left;
-                    while (prevInOrder!.Right != null)
-                    {
-                        prevInOrder = prevInOrder.Right;
-                    }
-
-                    (prevInOrder.Data, nodeToRemove.Data) = (nodeToRemove.Data, prevInOrder.Data);
-
-                    Remove(prevInOrder.Data);
-                    break;
-            }
+            RemoveNode(nodeToRemove);
         }
 
+        /**
+         * Performs inOrder traversal.
+         */
         public void ProcessInOrder(BSTNode? node, Action<BSTNode> operation)
         {
             if (node != null)
@@ -118,6 +73,9 @@
             }
         }
 
+        /**
+         * Performs levelOrder traversal.
+         */
         public void ProcessLevelOrder(BSTNode? node, Action<BSTNode> operation)
         {
             if (node != null)
@@ -196,6 +154,71 @@
             if (node.Left != null) result++;
             if (node.Right != null) result++;
             return result;
+        }
+
+        private void RemoveNode(BSTNode node)
+        {
+            var parent = node.Parent;
+            switch (Degree(node))
+            {
+                case 0:
+                    // if root, set root to null
+                    // else remove connections parent-son
+                    if (parent == null)
+                    {
+                        Root = null;
+                    }
+                    else
+                    {
+                        if (IsLeftSon(node))
+                        {
+                            parent.Left = null;
+                        }
+                        else
+                        {
+                            parent.Right = null;
+                        }
+                        node.Parent = null;
+                    }
+                    break;
+                case 1:
+                    // if root, son would be new root
+                    // else connect node's parent with node's son
+                    var son = node.Left ?? node.Right;
+                    if (parent == null)
+                    {
+                        Root = son;
+                        son!.Parent = null;
+                    }
+                    else
+                    {
+                        if (IsLeftSon(node))
+                        {
+                            parent.Left = son;
+                        }
+                        else
+                        {
+                            parent.Right = son;
+                        }
+                        son!.Parent = parent;
+                        node.Parent = null;
+                    }
+                    break;
+                case 2:
+                    // find prevInOrder
+                    // swap data
+                    // remove normally (degree would be 0 or 1)
+                    var prevInOrder = node.Left;
+                    while (prevInOrder!.Right != null)
+                    {
+                        prevInOrder = prevInOrder.Right;
+                    }
+
+                    (prevInOrder.Data, node.Data) = (node.Data, prevInOrder.Data);
+
+                    RemoveNode(prevInOrder);
+                    break;
+            }
         }
     }
 }

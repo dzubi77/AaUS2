@@ -32,10 +32,9 @@
             var leftSon = node.Left;
             var parent = node.Parent;
             var grandparent = parent!.Parent;
-            
+
             if (grandparent != null)
             {
-                node.Parent = grandparent;
                 if (IsLeftSon(parent))
                 {
                     grandparent.Left = node;
@@ -44,6 +43,7 @@
                 {
                     grandparent.Right = node;
                 }
+                node.Parent = grandparent;
             }
             else
             {
@@ -58,7 +58,7 @@
             }
 
             node.Left = parent;
-            parent.Parent = node;
+            parent.Parent = node; 
         }
 
         private void RotateRight(BSTNode node)
@@ -69,7 +69,6 @@
 
             if (grandparent != null)
             {
-                node.Parent = grandparent;
                 if (IsLeftSon(parent))
                 {
                     grandparent.Left = node;
@@ -78,6 +77,7 @@
                 {
                     grandparent.Right = node;
                 }
+                node.Parent = grandparent;
             }
             else
             {
