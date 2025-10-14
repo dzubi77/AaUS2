@@ -32,23 +32,20 @@
         /**
          * BST find operation implementation.
          */
-        public BSTNode Find(T value)
+        public T Find(T value)
         {
-            var current = Root;
-            while (current != null && value.CompareTo(current.Data) != 0)
-            {
-                int cmp = value.CompareTo(current.Data);
-                if (cmp < 0)
-                {
-                    current = current.Left;
-                }
-                else
-                {
-                    current = current.Right;
-                }
-            }
+            var node = FindNodeWithValue(value);
+            return node != null ? node.Data : throw new ArgumentException("BST::find -> No such key!");
+        }
 
-            return current ?? throw new ArgumentException("BST::find -> No such key!");
+        /**
+         * Performs BST interval find.
+         */
+        public LinkedList<BSTNode> FindAll(T min, T max)
+        {
+            LinkedList<BSTNode> list = new LinkedList<BSTNode>();
+            //
+            return list;
         }
 
         /**
@@ -56,12 +53,13 @@
          */
         public virtual void Remove(T value)
         {
-            var nodeToRemove = Find(value);
+            var nodeToRemove = FindNodeWithValue(value);
             RemoveNode(nodeToRemove);
         }
 
         /**
          * Performs inOrder traversal.
+         * TODO: maybe try to make it non recursive
          */
         public void ProcessInOrder(BSTNode? node, Action<BSTNode> operation)
         {
@@ -154,6 +152,25 @@
             if (node.Left != null) result++;
             if (node.Right != null) result++;
             return result;
+        }
+
+        private BSTNode FindNodeWithValue(T value)
+        {
+            var current = Root;
+            while (current != null && value.CompareTo(current.Data) != 0)
+            {
+                int cmp = value.CompareTo(current.Data);
+                if (cmp < 0)
+                {
+                    current = current.Left;
+                }
+                else
+                {
+                    current = current.Right;
+                }
+            }
+
+            return current ?? throw new ArgumentException("BST::FindNodeWithValue -> No such key!");
         }
 
         private void RemoveNode(BSTNode node)
