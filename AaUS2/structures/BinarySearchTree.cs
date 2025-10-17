@@ -4,7 +4,7 @@
     {
         /**
          * Class to represent BST node.
-         */
+         */ 
         public class BSTNode
         {
             public T Data { get; set; } 
@@ -19,7 +19,7 @@
         }
 
         public BSTNode? Root { get; set; } = null; 
-        public int Size { get; private set; } = 0;
+        public int Size { get; protected set; } = 0;
 
         /**
          * General call for BST insert. 
@@ -163,11 +163,17 @@
             }
         }
 
+        /**
+         * Creates new BST node. Subclass would create its required node type.
+         */
         protected virtual BSTNode CreateNode(T value)
         {
             return new BSTNode(value);
         }
 
+        /**
+         * Performs standard BST insert. Subclass could override it. 
+         */
         protected virtual BSTNode InsertNode(T value)
         {
             BSTNode node = CreateNode(value);
@@ -212,21 +218,10 @@
             return node;
         }
 
-        protected bool IsLeftSon(BSTNode node)
-        {
-            var parent = node.Parent;
-            return parent != null && parent.Left == node;
-        }
-
-        private int Degree(BSTNode node)
-        {
-            int result = 0;
-            if (node.Left != null) result++;
-            if (node.Right != null) result++;
-            return result;
-        }
-
-        private BSTNode FindNodeWithValue(T value)
+        /**
+         * Performs BST find, returning the node with searched value.
+         */
+        protected BSTNode FindNodeWithValue(T value)
         {
             var current = Root;
             while (current != null && value.CompareTo(current.Data) != 0)
@@ -238,8 +233,11 @@
             return current ?? throw new ArgumentException("BST::findNodeWithValue -> No such key!");
         }
 
-        private void RemoveNode(BSTNode node)
-        {
+        /**
+         * Removes node, based on its degree. Returns parent of removed node.
+         */
+        protected BSTNode? RemoveNode(BSTNode node)
+        { 
             var parent = node.Parent;
             switch (Degree(node))
             {
@@ -301,6 +299,27 @@
                     RemoveNode(prevInOrder);
                     break;
             }
+            return parent;
+        }
+
+        /**
+         * Checks if param node is left son.
+         */
+        protected bool IsLeftSon(BSTNode node)
+        {
+            var parent = node.Parent;
+            return parent != null && parent.Left == node;
+        }
+
+        /**
+         * Calculates degree of the param node.
+         */
+        private int Degree(BSTNode node)
+        {
+            int result = 0;
+            if (node.Left != null) result++;
+            if (node.Right != null) result++;
+            return result;
         }
     }
 }

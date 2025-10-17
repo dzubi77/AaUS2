@@ -2,6 +2,9 @@
 {
     public class AVLTree<T> : BinarySearchTree<T> where T : IComparable<T>
     {
+        /**
+         * Class to represent AVL node.
+         */
         public class AVLNode : BSTNode
         {
             public int Height { get; set; } = 1;
@@ -9,18 +12,28 @@
             public AVLNode(T data) : base(data) {}
         }
 
+        /**
+         * Performs AVL remove operation.
+         */
         public override void Remove(T value)
         {
-            base.Remove(value);
-            // store parent
-            // rebalance tree starting from parent
+            var nodeToRemove = FindNodeWithValue(value);
+            var parent = (AVLNode?)RemoveNode(nodeToRemove);
+            --Size;
+            BalanceTree(parent);
         }
 
+        /**
+         * Returns new AVL node.
+         */
         protected override BSTNode CreateNode(T value)
         {
             return new AVLNode(value);
         }
 
+        /**
+         * Performs AVL insert operation.
+         */
         protected override BSTNode InsertNode(T value)
         {
             var node = (AVLNode)base.InsertNode(value);
@@ -28,6 +41,9 @@
             return node;
         }
 
+        /**
+         * Performs simple left rotation. Customized to AVL with height recalculating.
+         */
         private void RotateLeft(AVLNode? node)
         {
             if (node == null) return;
@@ -69,6 +85,9 @@
             UpdateHeight(rightSon);
         }
 
+        /**
+         * Performs simple right rotation. Customized to AVL with height recalculating.
+         */
         private void RotateRight(AVLNode? node)
         {
             if (node == null) return;
@@ -110,6 +129,9 @@
             UpdateHeight(leftSon);
         }
 
+        /**
+         * Performs tree balance from given node. Used after insert and remove.
+         */
         private void BalanceTree(AVLNode? node)
         {
             var current = node;
@@ -118,8 +140,8 @@
                 var left = (AVLNode?)current.Left;
                 var right = (AVLNode?)current.Right;
                 int leftHeight = GetHeight(left);
-                int rightHeight = GetHeight(right);
-                current.Height = 1 + Math.Max(leftHeight, rightHeight);
+                int rightHeight = GetHeight(right); 
+                UpdateHeight(current);
                 int balance = leftHeight - rightHeight;
 
                 if (left != null)
@@ -134,38 +156,41 @@
                     //case Left-Right
                     else if (balance > 1 && leftBF < 0)
                     {
-                        RotateLeft(left);
+                        RotateLeft((AVLNode?)current.Left);
                         RotateRight(current);
                     } 
                 }
-                else
+                if (right != null)
                 {
-                    if (right != null)
-                    {
-                        int rightBF = GetHeight((AVLNode)right.Left) - GetHeight((AVLNode)right.Right);
+                    int rightBF = GetHeight((AVLNode)right.Left) - GetHeight((AVLNode)right.Right);
                         
-                        //case Right-Right
-                        if (balance < -1 && rightBF <= 0)
-                        {
-                            RotateLeft(current);
-                        }
-                        //case Right-Left
-                        else if (balance < -1 && rightBF > 0)
-                        { 
-                            RotateRight(right);
-                            RotateLeft(current);
-                        }
+                    //case Right-Right
+                    if (balance < -1 && rightBF <= 0)
+                    {
+                        RotateLeft(current);
+                    }
+                    //case Right-Left
+                    else if (balance < -1 && rightBF > 0)
+                    { 
+                        RotateRight((AVLNode?)current.Right);
+                        RotateLeft(current);
                     }
                 }
                 current = (AVLNode?)current.Parent;
             }
         }
 
+        /**
+         * Returns height of given node. If node is null, then returns 0.
+         */
         private int GetHeight(AVLNode? node)
         {
             return node?.Height ?? 0;
         }
 
+        /**
+         * Updates height of given node.
+         */
         private void UpdateHeight(AVLNode? node)
         {
             if (node == null) return;
