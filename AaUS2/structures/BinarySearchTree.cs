@@ -1,4 +1,4 @@
-﻿namespace AaUS2
+﻿namespace AaUS2.structures
 {
     public class BinarySearchTree<T> where T : IComparable<T>
     {
@@ -39,12 +39,84 @@
         }
 
         /**
+         * Finds element with minimal key value.
+         */
+        public T FindMin()
+        {
+            var current = Root;
+            if (current == null)
+            {
+                throw new Exception("BST is empty!");
+            }
+            else
+            {
+                while (current.Left != null)
+                {
+                    current = current.Left;
+                }
+                return current.Data;
+            }
+        }
+
+        /**
+         * Finds element with maximum key value.
+         */
+        public T FindMax()
+        {
+            var current = Root;
+            if (current == null)
+            {
+                throw new Exception("BST is empty!");
+            }
+            else
+            {
+                while (current.Right != null)
+                {
+                    current = current.Right;
+                }
+                return current.Data;
+            }
+        }
+
+        /**
          * Performs BST interval find.
          */
-        public LinkedList<BSTNode> FindAll(T min, T max)
+        public LinkedList<T> FindAll(T min, T max)
         {
-            LinkedList<BSTNode> list = new LinkedList<BSTNode>();
-            //
+            LinkedList<T> list = new LinkedList<T>();
+            LinkedList<BSTNode> stack = new LinkedList<BSTNode>();
+            var current = Root;
+            while (stack.Count > 0 || current != null)
+            {
+                while (current != null)
+                {
+                    // if current is within range, check left subtree, else check right subtree
+                    if (current.Data.CompareTo(min) >= 0)
+                    {
+                        stack.AddLast(current);
+                        current = current.Left;
+                    }
+                    else
+                    {
+                        current = current.Right;
+                    }
+                }
+
+                if (stack.Count == 0) break;
+
+                current = stack.Last!.Value;
+                stack.RemoveLast();
+
+                // add valid value to final list
+                if (current.Data.CompareTo(min) >= 0 && current.Data.CompareTo(max) <= 0)
+                {
+                    list.AddLast(current.Data);
+                }
+
+                // if current value is less than max, check right subtree
+                current = current.Data.CompareTo(max) < 0 ? current.Right : null;
+            }
+
             return list;
         }
 
@@ -55,11 +127,11 @@
         {
             var nodeToRemove = FindNodeWithValue(value);
             RemoveNode(nodeToRemove);
+            Size--;
         }
-
+         
         /**
          * Performs inOrder traversal.
-         * TODO: maybe try to make it non recursive
          */
         public void ProcessInOrder(BSTNode? node, Action<BSTNode> operation)
         {
@@ -136,7 +208,7 @@
             {
                 Root = node;
             }
-            ++Size;
+            Size++;
             return node;
         }
 
@@ -160,17 +232,10 @@
             while (current != null && value.CompareTo(current.Data) != 0)
             {
                 int cmp = value.CompareTo(current.Data);
-                if (cmp < 0)
-                {
-                    current = current.Left;
-                }
-                else
-                {
-                    current = current.Right;
-                }
+                current = cmp < 0 ? current.Left : current.Right;
             }
 
-            return current ?? throw new ArgumentException("BST::FindNodeWithValue -> No such key!");
+            return current ?? throw new ArgumentException("BST::findNodeWithValue -> No such key!");
         }
 
         private void RemoveNode(BSTNode node)
