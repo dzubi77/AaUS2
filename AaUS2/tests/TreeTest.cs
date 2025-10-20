@@ -1,6 +1,8 @@
-﻿using AaUS2.structures;
+﻿using DStruct;
 using System.Diagnostics;
 using System.Globalization;
+using DStruct.BinaryTrees;
+using AaUS2.structures;
 
 namespace AaUS2.tests
 {
@@ -11,20 +13,18 @@ namespace AaUS2.tests
             int insertCount = 10_000_000;
             int removeCount = 2_000_000;
             int findCount = 5_000_000;
-            int intervalFindCount = 1_000_000;
-
-            double bstTotalInsertMs = 0.0;
-            double avlTotalInsertMs = 0.0;
-            double bstTotalRemoveMs = 0.0;
-            double avlTotalRemoveMs = 0.0;
-            double bstTotalFindMs = 0.0;
-            double avlTotalFindMs = 0.0;
-
-            var bst = new BinarySearchTree<int>();
-            var avl = new AVLTree<int>();
-            var values = new List<int>(insertCount);
+            const double findMinMaxProbability = 0.5;
             var rand = new Random(50);
-            var sw = new Stopwatch();
+
+            double bstTotalInsertMs = 0.0, avlTotalInsertMs = 0.0, rbTotalInsertMs = 0.0;
+            double bstTotalRemoveMs = 0.0, avlTotalRemoveMs = 0.0, rbTotalRemoveMs = 0.0;
+            double bstTotalFindMs = 0.0, avlTotalFindMs = 0.0, rbTotalFindMs = 0.0;
+            double bstTotalMinMaxMs = 0.0, avlTotalMinMaxMs = 0.0;
+
+            var bst = new AaUS2.structures.BinarySearchTree<int>();
+            var avl = new AaUS2.structures.AVLTree<int>();
+            var rb = new RedBlackTree<int>();
+            var values = new List<int>(insertCount);
 
             for (int i = 0; i < insertCount; i++) values.Add(i);
             for (int i = insertCount - 1; i > 0; i--)
@@ -35,12 +35,15 @@ namespace AaUS2.tests
 
             using var writer = new StreamWriter(csvFile, append: false);
             using var writer2 = new StreamWriter(csvFileTotal, append: true);
+            var sw = new Stopwatch();
 
+            // insert
             Console.WriteLine("Starting insert test...");
             for (int i = 0; i < insertCount; i++)
             {
                 int val = values[i];
 
+                // BST
                 sw.Restart();
                 bst.Insert(val);
                 sw.Stop();
@@ -48,20 +51,53 @@ namespace AaUS2.tests
                 bstTotalInsertMs += bstMs;
                 writer.WriteLine($"Insert,BST,{i},{bstMs:F6}");
 
+                if (rand.NextDouble() < findMinMaxProbability && bst.Size > 0)
+                {
+                    sw.Restart();
+                    if (rand.NextDouble() < 0.5) bst.FindMin();
+                    else bst.FindMax();
+                    sw.Stop();
+                    double minMaxMs = sw.Elapsed.TotalMilliseconds;
+                    bstTotalMinMaxMs += minMaxMs;
+                    writer.WriteLine($"MinMax,BST,{i},{minMaxMs:F6}");
+                }
+
+                // AVL
                 sw.Restart();
                 avl.Insert(val);
                 sw.Stop();
                 double avlMs = sw.Elapsed.TotalMilliseconds;
                 avlTotalInsertMs += avlMs;
                 writer.WriteLine($"Insert,AVL,{i},{avlMs:F6}");
+
+                if (rand.NextDouble() < findMinMaxProbability && avl.Size > 0)
+                {
+                    sw.Restart();
+                    if (rand.NextDouble() < 0.5) avl.FindMin();
+                    else avl.FindMax();
+                    sw.Stop();
+                    double minMaxMs = sw.Elapsed.TotalMilliseconds;
+                    avlTotalMinMaxMs += minMaxMs;
+                    writer.WriteLine($"MinMax,AVL,{i},{minMaxMs:F6}");
+                }
+
+                // RB
+                sw.Restart();
+                rb.Insert(val);
+                sw.Stop();
+                double rbMs = sw.Elapsed.TotalMilliseconds;
+                rbTotalInsertMs += rbMs;
+                writer.WriteLine($"Insert,RB,{i},{rbMs:F6}");
             }
             Console.WriteLine("Insert phase done.");
 
+            // remove
             Console.WriteLine("Starting remove test...");
             for (int i = 0; i < removeCount; i++)
             {
                 int val = values[i];
 
+                // BST
                 sw.Restart();
                 bst.Remove(val);
                 sw.Stop();
@@ -69,19 +105,50 @@ namespace AaUS2.tests
                 bstTotalRemoveMs += bstMs;
                 writer.WriteLine($"Remove,BST,{i},{bstMs:F6}");
 
+                if (rand.NextDouble() < findMinMaxProbability && bst.Size > 0)
+                {
+                    sw.Restart();
+                    if (rand.NextDouble() < 0.5) bst.FindMin();
+                    else bst.FindMax();
+                    sw.Stop();
+                    double minMaxMs = sw.Elapsed.TotalMilliseconds;
+                    bstTotalMinMaxMs += minMaxMs;
+                    writer.WriteLine($"MinMax,BST,{i},{minMaxMs:F6}");
+                }
+
+                // AVL
                 sw.Restart();
                 avl.Remove(val);
                 sw.Stop();
                 double avlMs = sw.Elapsed.TotalMilliseconds;
                 avlTotalRemoveMs += avlMs;
                 writer.WriteLine($"Remove,AVL,{i},{avlMs:F6}");
+
+                if (rand.NextDouble() < findMinMaxProbability && avl.Size > 0)
+                {
+                    sw.Restart();
+                    if (rand.NextDouble() < 0.5) avl.FindMin();
+                    else avl.FindMax();
+                    sw.Stop();
+                    double minMaxMs = sw.Elapsed.TotalMilliseconds;
+                    avlTotalMinMaxMs += minMaxMs;
+                    writer.WriteLine($"MinMax,AVL,{i},{minMaxMs:F6}");
+                }
+
+                // RB
+                sw.Restart();
+                rb.Remove(val);
+                sw.Stop();
+                double rbMs = sw.Elapsed.TotalMilliseconds;
+                rbTotalRemoveMs += rbMs;
+                writer.WriteLine($"Remove,RB,{i},{rbMs:F6}");
             }
             values.RemoveRange(0, removeCount);
             Console.WriteLine("Remove phase done.");
 
+            // find
             Console.WriteLine("Starting find test...");
-            int foundBST = 0;
-            int foundAVL = 0;
+            int foundBST = 0, foundAVL = 0, foundRB = 0;
             for (int i = 0; i < findCount; i++)
             {
                 int val = values[rand.Next(values.Count)];
@@ -101,15 +168,29 @@ namespace AaUS2.tests
                 avlTotalFindMs += avlMs;
                 writer.WriteLine($"Find,AVL,{i},{avlMs:F6}");
                 if (avlFound) foundAVL++;
+
+                sw.Restart();
+                bool rbFound = rb.Find(val);
+                sw.Stop();
+                double rbMs = sw.Elapsed.TotalMilliseconds;
+                rbTotalFindMs += rbMs;
+                writer.WriteLine($"Find,RB,{i},{rbMs:F6}");
+                if (rbFound) foundRB++;
             }
-            Console.WriteLine($"Find phase done. Found {foundBST} (BST), {foundAVL} (AVL).");
+
+            Console.WriteLine($"Find phase done. Found {foundBST} (BST), {foundAVL} (AVL), {foundRB} (RB).");
 
             writer2.WriteLine($"Insert,BST,{bstTotalInsertMs:F6}");
             writer2.WriteLine($"Insert,AVL,{avlTotalInsertMs:F6}");
+            writer2.WriteLine($"Insert,RB,{rbTotalInsertMs:F6}");
             writer2.WriteLine($"Remove,BST,{bstTotalRemoveMs:F6}");
             writer2.WriteLine($"Remove,AVL,{avlTotalRemoveMs:F6}");
+            writer2.WriteLine($"Remove,RB,{rbTotalRemoveMs:F6}");
             writer2.WriteLine($"Find,BST,{bstTotalFindMs:F6}");
             writer2.WriteLine($"Find,AVL,{avlTotalFindMs:F6}");
+            writer2.WriteLine($"Find,RB,{rbTotalFindMs:F6}");
+            writer2.WriteLine($"MinMax,BST,{bstTotalMinMaxMs:F6}");
+            writer2.WriteLine($"MinMax,AVL,{avlTotalMinMaxMs:F6}");
 
             // interval find
             /*
@@ -139,7 +220,7 @@ namespace AaUS2.tests
             */
         }
 
-        private static bool TryFind(BinarySearchTree<int> bst, int value)
+        private static bool TryFind(AaUS2.structures.BinarySearchTree<int> bst, int value)
         {
             try
             {
@@ -152,7 +233,7 @@ namespace AaUS2.tests
             }
         }
 
-        private static bool TryFind(AVLTree<int> avl, int value)
+        private static bool TryFind(AaUS2.structures.AVLTree<int> avl, int value)
         {
             try
             {
