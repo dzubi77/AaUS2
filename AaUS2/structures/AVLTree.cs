@@ -8,8 +8,10 @@
         public class AVLNode : BSTNode
         {
             public int Height { get; set; } = 1;
-             
-            public AVLNode(T data) : base(data) {}
+
+            public AVLNode(T data) : base(data)
+            {
+            }
         }
 
         /**
@@ -69,6 +71,7 @@
                 {
                     parent.Right = rightSon;
                 }
+
                 rightSon.Parent = parent;
             }
 
@@ -81,8 +84,9 @@
                 rightLeftSon.Parent = node;
             }
 
-            UpdateHeight(node);
-            UpdateHeight(rightSon);
+            node.Height = 1 + Math.Max((node.Left as AVLNode)?.Height ?? 0, (node.Right as AVLNode)?.Height ?? 0);
+            rightSon.Height = 1 + Math.Max((rightSon.Left as AVLNode)?.Height ?? 0,
+                (rightSon.Right as AVLNode)?.Height ?? 0);
         }
 
         /**
@@ -113,6 +117,7 @@
                 {
                     parent.Right = leftSon;
                 }
+
                 leftSon.Parent = parent;
             }
 
@@ -125,8 +130,9 @@
                 leftRightSon.Parent = node;
             }
 
-            UpdateHeight(node);
-            UpdateHeight(leftSon);
+            node.Height = 1 + Math.Max((node.Left as AVLNode)?.Height ?? 0, (node.Right as AVLNode)?.Height ?? 0);
+            leftSon.Height = 1 + Math.Max((leftSon.Left as AVLNode)?.Height ?? 0,
+                (leftSon.Right as AVLNode)?.Height ?? 0);
         }
 
         /**
@@ -137,66 +143,54 @@
             var current = node;
             while (current != null)
             {
-                var left = (AVLNode?)current.Left;
-                var right = (AVLNode?)current.Right;
-                int leftHeight = GetHeight(left);
-                int rightHeight = GetHeight(right); 
-                UpdateHeight(current);
+                var left = current.Left as AVLNode;
+                var right = current.Right as AVLNode;
+                int leftHeight = left?.Height ?? 0;
+                int rightHeight = right?.Height ?? 0;
+
+                current.Height = 1 + Math.Max(leftHeight, rightHeight);
                 int balance = leftHeight - rightHeight;
 
-                if (left != null)
+                if (balance > 1 && left != null)
                 {
-                    int leftBF = GetHeight((AVLNode)left.Left) - GetHeight((AVLNode)left.Right);
-                    
-                    //case Left-Left
-                    if (balance > 1 && leftBF >= 0)
+                    var leftLeft = left.Left as AVLNode;
+                    var leftRight = left.Right as AVLNode;
+                    int leftBalance = (leftLeft?.Height ?? 0) - (leftRight?.Height ?? 0);
+
+                    // case LL
+                    if (leftBalance >= 0) 
                     {
+                        RotateRight(current); 
+                    }       
+                    // case LR
+                    else
+                    {
+                        RotateLeft(left);
                         RotateRight(current);
                     }
-                    //case Left-Right
-                    else if (balance > 1 && leftBF < 0)
-                    {
-                        RotateLeft((AVLNode?)current.Left);
-                        RotateRight(current);
-                    } 
                 }
-                if (right != null)
+
+                else if (balance < -1 && right != null)
                 {
-                    int rightBF = GetHeight((AVLNode)right.Left) - GetHeight((AVLNode)right.Right);
-                        
-                    //case Right-Right
-                    if (balance < -1 && rightBF <= 0)
+                    var rightLeft = right.Left as AVLNode;
+                    var rightRight = right.Right as AVLNode;
+                    int rightBalance = (rightLeft?.Height ?? 0) - (rightRight?.Height ?? 0);
+
+                    // RR
+                    if (rightBalance <= 0)  
                     {
                         RotateLeft(current);
                     }
-                    //case Right-Left
-                    else if (balance < -1 && rightBF > 0)
-                    { 
-                        RotateRight((AVLNode?)current.Right);
+                    // RL
+                    else
+                    {
+                        RotateRight(right); 
                         RotateLeft(current);
                     }
                 }
-                current = (AVLNode?)current.Parent;
+
+                current = current.Parent as AVLNode;
             }
-        }
-
-        /**
-         * Returns height of given node. If node is null, then returns 0.
-         */
-        private int GetHeight(AVLNode? node)
-        {
-            return node?.Height ?? 0;
-        }
-
-        /**
-         * Updates height of given node.
-         */
-        private void UpdateHeight(AVLNode? node)
-        {
-            if (node == null) return;
-            int leftHeight = GetHeight((AVLNode?)node.Left);
-            int rightHeight = GetHeight((AVLNode?)node.Right);
-            node.Height = 1 + Math.Max(leftHeight, rightHeight);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using AaUS2;
-using System.Diagnostics;
-using AaUS2.structures;
+﻿using AaUS2.tests;
 
 namespace AaUS2_console 
 {
@@ -8,16 +6,11 @@ namespace AaUS2_console
     {
         static void Main(String[] args)
         {
-            var tree = new AVLTree<int>();
-            for (int i = 0; i < 10; ++i)
+            for (int i = 0; i < 5; ++i)
             {
-                tree.Insert(i + 1);
+                Console.WriteLine("---------------------- Iteration no." + (i + 1) + " ----------------------");
+                TreeTest.TestInsertRemoveFind("TreeTest" + (i + 1) + ".csv", "TotalStats" + (i + 1) + ".csv");
             }
-
-            tree.Remove(9);
-            tree.Remove(10);
-
-            tree.ProcessLevelOrder(tree.Root, (n) => Console.Write(n.Data + " "));
         }
     }
 }
