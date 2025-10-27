@@ -341,6 +341,25 @@ namespace AaUS2.tests
                 }
             }
         }
+
+        public static bool IsAVLTree(structures.AVLTree<int> tree)
+        {
+            bool isAvl = true;
+
+            tree.ProcessInOrder(tree.Root, (node) =>
+            {
+                if (!isAvl) return;
+                var left = (structures.AVLTree<int>.AVLNode?) node.Left;
+                var right = (structures.AVLTree<int>.AVLNode?) node.Right;
+                int balance = (left?.Height ?? 0) - (right?.Height ?? 0);
+                if (balance < -1 || balance > 1)
+                {
+                    isAvl = false;
+                    Console.WriteLine("The tree is not AVL!");
+                }
+            });
+            return isAvl;
+        }
         
         private static bool TryFind(AaUS2.structures.BinarySearchTree<int> bst, int value)
         {
