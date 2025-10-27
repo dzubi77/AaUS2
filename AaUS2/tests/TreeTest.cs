@@ -89,6 +89,7 @@ namespace AaUS2.tests
                 rbTotalInsertMs += rbMs;
                 writer.WriteLine($"Insert,RB,{i},{rbMs:F6}");
             }
+
             Console.WriteLine("Insert phase done.");
 
             // remove
@@ -143,6 +144,7 @@ namespace AaUS2.tests
                 rbTotalRemoveMs += rbMs;
                 writer.WriteLine($"Remove,RB,{i},{rbMs:F6}");
             }
+
             values.RemoveRange(0, removeCount);
             Console.WriteLine("Remove phase done.");
 
@@ -220,6 +222,126 @@ namespace AaUS2.tests
             */
         }
 
+        public static void TestRandomOperations(int operationCount)
+        {
+            var bst = new AaUS2.structures.BinarySearchTree<int>();
+            var avl = new AaUS2.structures.AVLTree<int>(); 
+            var hlpList = new List<int>(); // to store inserted data
+            var dataList = new List<int>(operationCount); // to store all data
+            var rnd = new Random(100);
+
+            for (int i = 0; i < operationCount; i++)
+            {
+                dataList.Add(i + 1); 
+            }
+
+            for (int i = operationCount - 1; i > 0; i--)
+            {
+                int j = rnd.Next(i + 1);
+                (dataList[i], dataList[j]) = (dataList[j], dataList[i]);
+            }
+
+            // main loop
+            for (int i = 0; i < operationCount; i++)
+            {
+                int operation = rnd.Next(100);
+                if (operation < 30) // insert
+                {
+                    int data = dataList[i];
+                    hlpList.Add(data);
+                    bst.Insert(data);
+                    avl.Insert(data);
+                    if (hlpList.Count == bst.Size && hlpList.Count == avl.Size)
+                    {
+                        Console.WriteLine((i + 1) + " Insert successful [data: " + data + "]");
+                    }
+                    else
+                    {
+                        Console.WriteLine((i + 1) + " Insert -> something went wrong [data to insert: " + data + "]");
+                    }
+                }
+                else if (operation < 50) // remove
+                {
+                    if (hlpList.Count > 0)
+                    {
+                        int data = hlpList[rnd.Next(hlpList.Count)];
+                        hlpList.Remove(data);
+                        bst.Remove(data);
+                        avl.Remove(data);
+                        if (hlpList.Count == bst.Size && hlpList.Count == avl.Size)
+                        {
+                            Console.WriteLine((i + 1) + " Remove successful [data: " + data + "]");
+                        }
+                        else
+                        {
+                            Console.WriteLine((i + 1) + " Remove -> something went wrong [data to remove: " + data + "]");
+                        }
+                    }
+                }
+                else if (operation < 70) // find
+                {
+                    if (hlpList.Count > 0)
+                    {
+                        int data = hlpList[rnd.Next(hlpList.Count)];
+                        var foundInList = hlpList.Contains(data);
+                        var foundInBst = TryFind(bst, data);
+                        var foundInAvl = TryFind(avl, data);
+                        if (foundInList && foundInBst && foundInAvl)
+                        {
+                            Console.WriteLine((i + 1) + " Find successful [data: " + data + "]");
+                        }
+                        else
+                        {
+                            Console.WriteLine((i + 1) + " Find -> something went wrong [data to find: " + data + "]");
+                        }
+                    }
+                }
+                else // interval find
+                {
+                    if (hlpList.Count > 0)
+                    {
+                        hlpList.Sort();
+                        int structureMin = hlpList.Min();
+                        int structureMax = hlpList.Max();
+                        int intervalMin = rnd.Next(structureMin, structureMax);
+                        int intervalMax = rnd.Next(structureMin, structureMax);
+                        if (intervalMin > intervalMax)
+                        {
+                            int tmp = intervalMin;
+                            intervalMin = intervalMax;
+                            intervalMax = tmp;
+                        }
+                        var resultBst = bst.FindAll(intervalMin, intervalMax);
+                        var resultAvl = avl.FindAll(intervalMin, intervalMax);
+                        var resultList = hlpList.FindAll((a) => a >= intervalMin && a <= intervalMax);
+
+                        if (resultList.Count != resultAvl.Count || resultList.Count != resultBst.Count ||
+                            resultBst.Count != resultAvl.Count)
+                        {
+                            Console.WriteLine((i + 1) + " Interval find -> something went wrong (wrong element count) [interval: " + intervalMin + " - " + intervalMax + "]");
+                        }
+                        else
+                        {
+                            for (int j = 0; j < resultList.Count; ++j)
+                            {
+                                if (resultList[j] != resultBst[j])
+                                {
+                                    Console.WriteLine((i + 1) + " Interval find -> something went wrong (wrong bst element) [interval: " + intervalMin + " - " + intervalMax + "]");
+                                }
+
+                                if (resultList[j] != resultAvl[j])
+                                {
+                                    Console.WriteLine((i + 1) + " Interval find -> something went wrong (wrong avl element) [interval: " + intervalMin + " - " + intervalMax + "]");
+
+                                }
+                            }
+                            Console.WriteLine((i + 1) + " Interval find performed. [interval: " + intervalMin + " - " + intervalMax + "]");
+                        }
+                    }
+                }
+            }
+        }
+        
         private static bool TryFind(AaUS2.structures.BinarySearchTree<int> bst, int value)
         {
             try

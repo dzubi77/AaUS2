@@ -81,9 +81,9 @@
         /**
          * Performs BST interval find.
          */
-        public LinkedList<T> FindAll(T min, T max)
+        public List<T> FindAll(T min, T max)
         {
-            LinkedList<T> list = new LinkedList<T>();
+            List<T> list = new List<T>();
             LinkedList<BSTNode> stack = new LinkedList<BSTNode>();
             var current = Root;
             while (stack.Count > 0 || current != null)
@@ -110,7 +110,7 @@
                 // add valid value to final list
                 if (current.Data.CompareTo(min) >= 0 && current.Data.CompareTo(max) <= 0)
                 {
-                    list.AddLast(current.Data);
+                    list.Add(current.Data);
                 }
 
                 // if current value is less than max, check right subtree

@@ -22,7 +22,7 @@
             var nodeToRemove = FindNodeWithValue(value);
             var parent = (AVLNode?)RemoveNode(nodeToRemove);
             --Size;
-            BalanceTree(parent);
+            BalanceTreeAfterRemove(parent);
         }
 
         /**
@@ -39,7 +39,7 @@
         protected override BSTNode InsertNode(T value)
         {
             var node = (AVLNode)base.InsertNode(value);
-            BalanceTree(node);
+            BalanceTreeAfterInsert(node);
             return node;
         }
 
@@ -136,9 +136,67 @@
         }
 
         /**
-         * Performs tree balance from given node. Used after insert and remove.
+         * Performs tree balance from given node after insert.
          */
-        private void BalanceTree(AVLNode? node)
+        private void BalanceTreeAfterInsert(AVLNode? node)
+        {
+            var current = node?.Parent as AVLNode;
+            while (current != null) 
+            {
+                var left = current.Left as AVLNode;
+                var right = current.Right as AVLNode;
+                int leftHeight = left?.Height ?? 0;
+                int rightHeight = right?.Height ?? 0;
+
+                current.Height = 1 + Math.Max(leftHeight, rightHeight);
+                int balance = leftHeight - rightHeight;
+
+                if (balance > 1 && left != null)
+                {
+                    var leftLeft = left.Left as AVLNode;
+                    var leftRight = left.Right as AVLNode;
+                    int leftBalance = (leftLeft?.Height ?? 0) - (leftRight?.Height ?? 0);
+
+                    // case LL
+                    if (leftBalance >= 0)
+                    {
+                        RotateRight(current);
+                    }
+                    // case LR
+                    else
+                    {
+                        RotateLeft(left);
+                        RotateRight(current);
+                    }
+                }
+
+                else if (balance < -1 && right != null)
+                {
+                    var rightLeft = right.Left as AVLNode;
+                    var rightRight = right.Right as AVLNode;
+                    int rightBalance = (rightLeft?.Height ?? 0) - (rightRight?.Height ?? 0);
+
+                    // case RR
+                    if (rightBalance <= 0)
+                    {
+                        RotateLeft(current);
+                    }
+                    // case RL
+                    else
+                    {
+                        RotateRight(right);
+                        RotateLeft(current);
+                    }
+                }
+
+                current = current.Parent as AVLNode;
+            }
+        }
+
+        /**
+         * Performs tree balance from given node after remove.
+         */
+        private void BalanceTreeAfterRemove(AVLNode? node)
         {
             var current = node;
             while (current != null)
@@ -150,6 +208,8 @@
 
                 current.Height = 1 + Math.Max(leftHeight, rightHeight);
                 int balance = leftHeight - rightHeight;
+
+                if (balance == 0) break;
 
                 if (balance > 1 && left != null)
                 {
@@ -176,12 +236,12 @@
                     var rightRight = right.Right as AVLNode;
                     int rightBalance = (rightLeft?.Height ?? 0) - (rightRight?.Height ?? 0);
 
-                    // RR
+                    // case RR
                     if (rightBalance <= 0)  
                     {
                         RotateLeft(current);
                     }
-                    // RL
+                    // case RL
                     else
                     {
                         RotateRight(right); 
