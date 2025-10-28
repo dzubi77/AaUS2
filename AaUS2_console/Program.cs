@@ -13,7 +13,7 @@ namespace AaUS2_console
                 TreeTest.TestInsertRemoveFind("TreeTest" + (i + 1) + ".csv", "TotalStats" + (i + 1) + ".csv");
             }
             */
-            TreeTest.TestRandomOperations(1_000_000);
+            TreeTest.TestRandomOperations(100000);
         }
     }
 }

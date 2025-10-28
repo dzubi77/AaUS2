@@ -228,7 +228,7 @@ namespace AaUS2.tests
             var avl = new AaUS2.structures.AVLTree<int>(); 
             var hlpList = new List<int>(); // to store inserted data
             var dataList = new List<int>(operationCount); // to store all data
-            var rnd = new Random(100);
+            var rnd = new Random();
 
             for (int i = 0; i < operationCount; i++)
             {
@@ -244,6 +244,14 @@ namespace AaUS2.tests
             // main loop
             for (int i = 0; i < operationCount; i++)
             {
+                if (i % 20 == 0)
+                {
+                    if (!IsAVLTree(avl))
+                    {
+                        Console.WriteLine("Tree is not AVL!");
+                        return; 
+                    }
+                }
                 int operation = rnd.Next(100);
                 if (operation < 30) // insert
                 {
@@ -344,21 +352,22 @@ namespace AaUS2.tests
 
         public static bool IsAVLTree(structures.AVLTree<int> tree)
         {
-            bool isAvl = true;
+            return IsAvl((structures.AVLTree<int>.AVLNode?)tree.Root);
+        } 
 
-            tree.ProcessInOrder(tree.Root, (node) =>
+        private static bool IsAvl(structures.AVLTree<int>.AVLNode? node)
+        {
+            if (node == null) return true;
+            var left = (structures.AVLTree<int>.AVLNode?)node.Left;
+            var right = (structures.AVLTree<int>.AVLNode?)node.Right;
+            int balance = (left?.Height ?? 0) - (right?.Height ?? 0);
+            if (Math.Abs(balance) > 1)
             {
-                if (!isAvl) return;
-                var left = (structures.AVLTree<int>.AVLNode?) node.Left;
-                var right = (structures.AVLTree<int>.AVLNode?) node.Right;
-                int balance = (left?.Height ?? 0) - (right?.Height ?? 0);
-                if (balance < -1 || balance > 1)
-                {
-                    isAvl = false;
-                    Console.WriteLine("The tree is not AVL!");
-                }
-            });
-            return isAvl;
+                Console.WriteLine("The tree is not AVL!");
+                return false;
+            }
+
+            return IsAvl(left) && IsAvl(right);
         }
         
         private static bool TryFind(AaUS2.structures.BinarySearchTree<int> bst, int value)

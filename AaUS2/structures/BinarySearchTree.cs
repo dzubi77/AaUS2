@@ -296,8 +296,8 @@
 
                     (prevInOrder.Data, node.Data) = (node.Data, prevInOrder.Data);
 
-                    RemoveNode(prevInOrder);
-                    break;
+                    var removedParent = RemoveNode(prevInOrder);
+                    return removedParent;
             }
             return parent;
         }

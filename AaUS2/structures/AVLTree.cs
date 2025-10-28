@@ -209,8 +209,6 @@
                 current.Height = 1 + Math.Max(leftHeight, rightHeight);
                 int balance = leftHeight - rightHeight;
 
-                if (balance == 0) break;
-
                 if (balance > 1 && left != null)
                 {
                     var leftLeft = left.Left as AVLNode;
