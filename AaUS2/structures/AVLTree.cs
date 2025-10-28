@@ -140,6 +140,7 @@
          */
         private void BalanceTreeAfterInsert(AVLNode? node)
         {
+            // actual start from node's parent
             var current = node?.Parent as AVLNode;
             while (current != null) 
             {
@@ -168,6 +169,8 @@
                         RotateLeft(left);
                         RotateRight(current);
                     }
+
+                    break;
                 }
 
                 else if (balance < -1 && right != null)
@@ -187,6 +190,13 @@
                         RotateRight(right);
                         RotateLeft(current);
                     }
+
+                    break;
+                }
+
+                if (balance == 0)
+                {
+                    break;
                 }
 
                 current = current.Parent as AVLNode;
