@@ -213,13 +213,16 @@
             {
                 var left = current.Left as AVLNode;
                 var right = current.Right as AVLNode;
+
+                int oldBalance = (left?.Height ?? 0) - (right?.Height ?? 0);
+
                 int leftHeight = left?.Height ?? 0;
                 int rightHeight = right?.Height ?? 0;
 
                 current.Height = 1 + Math.Max(leftHeight, rightHeight);
-                int balance = leftHeight - rightHeight;
+                int newBalance = leftHeight - rightHeight;
 
-                if (balance > 1 && left != null)
+                if (newBalance > 1 && left != null)
                 {
                     var leftLeft = left.Left as AVLNode;
                     var leftRight = left.Right as AVLNode;
@@ -238,7 +241,7 @@
                     }
                 }
 
-                else if (balance < -1 && right != null)
+                else if (newBalance < -1 && right != null)
                 {
                     var rightLeft = right.Left as AVLNode;
                     var rightRight = right.Right as AVLNode;
@@ -255,6 +258,10 @@
                         RotateRight(right); 
                         RotateLeft(current);
                     }
+                }
+                else
+                {
+                    if (oldBalance == 0 && Math.Abs(newBalance) == 1) break;
                 }
 
                 current = current.Parent as AVLNode;
