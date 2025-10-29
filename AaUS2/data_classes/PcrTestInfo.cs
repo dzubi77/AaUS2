@@ -1,9 +1,0 @@
-﻿using AaUS2.structures;
-
-namespace AaUS2.data_classes
-{
-    public class PcrTestInfo
-    {
-
-    }
-}

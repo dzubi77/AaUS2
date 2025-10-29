@@ -11,7 +11,7 @@
 
             public AVLNode(T data) : base(data)
             {
-            }
+            } 
         }
 
         /**
