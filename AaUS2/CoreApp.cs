@@ -1,21 +1,55 @@
 ﻿using AaUS2.data_classes;
+using AaUS2.data_classes.wrappers;
 using AaUS2.structures;
 
 namespace AaUS2
 {
+    /**
+     * Represents object that manipulates with data and data structures.
+     * GUI uses its operations.
+     */
     public class CoreApp
     {
-        public AVLTree<Person> Patients { get; set; } = new();
-        // TODO: add necessary AVLs
+        public AVLTree<Person> Patients { get; } = new();
+        public AVLTree<PcrById> Tests { get; } = new();
+        public AVLTree<PcrByDistrict> TestsByDistrict { get; } = new();
+        public AVLTree<PcrByRegion> TestsByRegion { get; } = new();
+        public AVLTree<PcrByPlace> TestsByPlace { get; } = new();
+        public AVLTree<PcrByDate> TestsByDate { get; } = new();
 
         // 1
-        public void InsertPcr() {} 
-        
+        public void InsertPcr(PcrTest test)
+        {
+            PcrById pcr = new PcrById(test);
+            Tests.Insert(pcr);
+            TestsByDistrict.Insert(new PcrByDistrict(test));
+            TestsByRegion.Insert(new PcrByRegion(test));
+
+            var personDummy = new Person(test.PatientId);
+            var patient = Patients.Find(personDummy);
+            patient.Tests.Insert(pcr); 
+        }
+
         // 2
-        public void FindPcrResultForPatient() {}
+        public PcrTest FindPcrResultForPatient(int testId, string patientId)
+        {
+            var personDummy = new Person(patientId);
+            var patient = Patients.Find(personDummy);
+            var pcrDummy = new PcrById(new PcrTest(testId));
+            var result = patient.Tests.Find(pcrDummy);
+            return result.Test; 
+        }
         
         // 3
-        public void FindAllPatientTests() {}
+        public List<PcrById> FindAllPatientTests(string patientId)
+        {
+            var personDummy = new Person(patientId);
+            var patient = Patients.Find(personDummy);
+            List<PcrById> tests = new List<PcrById>(patient.Tests.Size);
+            patient.Tests.ProcessInOrder(patient.Tests.Root, (n) => tests.Add(n.Data));
+            // sort tests, or add tree to patient (sorted by date)
+            return tests;
+        }
         
         // 4
         public void FindPositiveTestsForDistrict() {}
@@ -66,7 +100,13 @@ namespace AaUS2
         public void InsertPerson() {}
 
         // 20
-        public void RemovePcr() {}
+        public void RemovePcr(int testId)
+        {
+            var tmp = new PcrTest(testId);
+            Tests.Remove(new PcrById(tmp));
+            TestsByDistrict.Remove(new PcrByDistrict(tmp));
+            TestsByRegion.Remove(new PcrByRegion(tmp));
+        }
 
         // 21
         public void RemovePerson() {}
