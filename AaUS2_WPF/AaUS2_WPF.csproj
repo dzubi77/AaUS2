@@ -12,4 +12,8 @@
     <PackageReference Include="DStruct.NET" Version="1.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AaUS2\AaUS2.csproj" />
+  </ItemGroup>
+
 </Project>

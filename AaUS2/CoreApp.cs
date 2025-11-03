@@ -46,92 +46,98 @@ namespace AaUS2
             var result = patient.Tests.Find(pcrDummy);
             return result.Test; 
         }
-        
+
         // 3
-        public ReadOnlyCollection<PcrByDate> FindAllPatientTests(string patientId)
+        public ObservableCollection<PcrByDate> FindAllPatientTests(string patientId)
         {
             var personDummy = new Person(patientId);
             var patient = Patients.Find(personDummy);
             var tree = patient.TestsByDate;
             List<PcrByDate> tests = new List<PcrByDate>(patient.Tests.Size);
             tree.ProcessInOrder(tree.Root, (n) => tests.Add(n.Data));
-            return tests.AsReadOnly(); 
-        } 
-        
+            throw new NotImplementedException();
+        }
+
         // 4
-        public ReadOnlyCollection<PcrByDistrict> FindPositiveTestsForDistrict(int districtId, DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByDistrict> FindPositiveTestsForDistrict(int districtId, DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
-        
+
         // 5
-        public ReadOnlyCollection<PcrByDistrict> FindAllTestsForDistrict(int districtId, DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByDistrict> FindAllTestsForDistrict(int districtId, DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
-        
+
         // 6
-        public ReadOnlyCollection<PcrByRegion> FindPositiveTestsForRegion(int regionId, DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByRegion> FindPositiveTestsForRegion(int regionId, DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
-        
+
         // 7
-        public ReadOnlyCollection<PcrByRegion> FindAllTestsForRegion(int regionId, DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByRegion> FindAllTestsForRegion(int regionId, DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
 
         // 8
-        public ReadOnlyCollection<PcrByDate> FindPositiveTestsWithin(DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByDate> FindPositiveTestsWithin(DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
 
         // 9
-        public ReadOnlyCollection<PcrByDate> FindAllTestsWithin(DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByDate> FindAllTestsWithin(DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
-        } 
+        }
 
         // 10
-        public ReadOnlyCollection<Person> FindPatientsByDistrict(int x, int districtId, DateOnly currentDate)
+        public ObservableCollection<Person> FindPatientsByDistrict(int x, int districtId, DateOnly currentDate)
         {
             throw new NotImplementedException();
         }
 
         // 11
-        public ReadOnlyCollection<Person> FindAndSortPatientsByDistrict(int x, int districtId, DateOnly currentDate)
+        public ObservableCollection<Person> FindAndSortPatientsByDistrict(int x, int districtId, DateOnly currentDate)
         {
             throw new NotImplementedException();
         }
 
         // 12
-        public ReadOnlyCollection<Person> FindPatientsByRegion(int x, int regionId, DateOnly currentDate)
+        public ObservableCollection<Person> FindPatientsByRegion(int x, int regionId, DateOnly currentDate)
         {
             throw new NotImplementedException();
         }
 
         // 13
-        public ReadOnlyCollection<Person> FindAllPatientsWithin(int x, DateOnly currentDate)
+        public ObservableCollection<Person> FindAllPatientsWithin(int x, DateOnly currentDate)
         {
             throw new NotImplementedException();
         }
 
-        // 14
-        public Person FindMostIllPatient(int x, DateOnly currentDate)
+        // 14 
+        public ObservableCollection<PcrByDistrict> FindTopSickByDistrict(DateOnly? date, int x)
         {
             throw new NotImplementedException(); 
         }
 
         // 15
-        public void SortDistrictsByIll() {}
+        public ObservableCollection<PcrByDistrict> FindDistrictsBySickCount(DateOnly? date, int xDays)
+        {
+            throw new NotImplementedException();
+        }
 
         // 16
-        public void SortRegionsByIll() {}
+        public ObservableCollection<PcrByRegion> FindRegionsBySickCount(DateOnly? date, int xDays)
+        {
+            throw new NotImplementedException();
+        }
 
         // 17
-        public ReadOnlyCollection<PcrByPlace> FindAllTestsByPlace(int placeId, DateOnly dateFrom, DateOnly dateTo)
+        public ObservableCollection<PcrByPlace> FindAllTestsByPlace(int placeId, DateOnly from, DateOnly to)
         {
             throw new NotImplementedException();
         }
@@ -139,7 +145,8 @@ namespace AaUS2
         // 18
         public PcrTest FindPcrByCode(int testId)
         {
-            throw new NotImplementedException();
+            var testDummy = new PcrById(new PcrTest(testId)); 
+            return Tests.Find(testDummy).Test;
         }
 
         // 19
@@ -170,7 +177,6 @@ namespace AaUS2
         {
             var patient = Patients.Find(new Person(patientId));
             var testTree = patient.Tests;
-            var testTreeByDate = patient.TestsByDate;
             testTree.ProcessInOrder(testTree.Root, (n) =>
                 {
                     var t = n.Data.Test;
@@ -179,10 +185,6 @@ namespace AaUS2
                     TestsByRegion.Remove(new PcrByRegion(t));
                     TestsByPlace.Remove(new PcrByPlace(t));
                     TestsByDate.Remove(new PcrByDate(t));  
-                });
-            testTreeByDate.ProcessInOrder(testTreeByDate.Root, (n) =>
-                {
-
                 });
         }
     }

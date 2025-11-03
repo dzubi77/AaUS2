@@ -3,10 +3,289 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AaUS2_WPF"
         mc:Ignorable="d"
         Title="AaUS2_GUI" Height="450" Width="800">
-    <Grid>
+    <DockPanel Background="#f9f9f9">
+        <Menu DockPanel.Dock="Top" Background="#333" Foreground="White">
+            <MenuItem Header="_File">
+                <MenuItem Header="Uložiť..." Command="{Binding SaveCommand}" />
+                <MenuItem Header="Načítať..." Command="{Binding LoadCommand}" />
+                <Separator/>
+                <MenuItem Header="Ukončiť aplikáciu" Command="ApplicationCommands.Close"/>
+            </MenuItem>
+        </Menu>
 
-    </Grid>
+        <TabControl Margin="10" FontSize="14">
+            <TabItem Header="Osoby">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="10" Background="White">
+                        <TextBlock Text="Pridanie novej osoby" FontWeight="Bold" FontSize="16" Margin="0 0 0 10"/>
+
+                        <TextBlock Text="Rodné číslo:"/>
+                        <TextBox Text="{Binding NewPersonId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Meno:"/>
+                        <TextBox Text="{Binding NewPersonFirstName}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Priezvisko:"/>
+                        <TextBox Text="{Binding NewPersonLastName}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Dátum narodenia:"/>
+                        <DatePicker SelectedDate="{Binding NewPersonBirthDate}" Margin="0 0 0 8"/>
+
+                        <Button Content="Uložiť údaje" 
+                                Command="{Binding InsertPersonCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="0 10 0 0" Height="35"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Column="1" ItemsSource="{Binding Persons}" 
+                              AutoGenerateColumns="False" Margin="15,0,0,0"
+                              IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column"
+                              Background="White" BorderBrush="#ccc" BorderThickness="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Rodné číslo" Binding="{Binding PersonId}" Width="*"/>
+                            <DataGridTextColumn Header="Meno" Binding="{Binding FirstName}" Width="*"/>
+                            <DataGridTextColumn Header="Priezvisko" Binding="{Binding LastName}" Width="*"/>
+                            <DataGridTemplateColumn Header="" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🗑️" 
+                                                Command="{Binding DataContext.DeletePersonCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding PersonId}" 
+                                                Background="#e74c3c" Foreground="White"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="PCR Testy">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="10" Background="White">
+                        <TextBlock Text="Pridanie PCR testu" FontWeight="Bold" FontSize="16" Margin="0 0 0 10"/>
+
+                        <TextBlock Text="ID testu:"/>
+                        <TextBox Text="{Binding NewTestId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="ID pacienta (rodné číslo):"/>
+                        <TextBox Text="{Binding NewTestPatientId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="ID okresu:"/>
+                        <TextBox Text="{Binding NewTestDistrictId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="ID kraja:"/>
+                        <TextBox Text="{Binding NewTestRegionId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="ID odberného miesta:"/>
+                        <TextBox Text="{Binding NewTestPlaceId}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Hodnota testu:"/>
+                        <TextBox Text="{Binding NewTestResultValue}" Margin="0 0 0 8"/>
+
+                        <CheckBox Content="Výsledok (zaškrtnúť ak pozitívny)" IsChecked="{Binding NewTestIsPositive}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Dátum / čas vykonania testu:"/>
+                        <DatePicker SelectedDate="{Binding NewTestDate}" Margin="0 0 0 8"/>
+                        <TextBox Text="{Binding NewTestTime}" Margin="0 0 0 8"/>
+
+                        <TextBlock Text="Poznámka:"/>
+                        <TextBox Text="{Binding NewTestNote}" Margin="0 0 0 8"/>
+
+                        <Button Content="Uložiť údaje" 
+                                Command="{Binding InsertTestCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="0 10 0 0" Height="35"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Column="1" ItemsSource="{Binding Results}" 
+                              AutoGenerateColumns="False" Margin="15,0,0,0"
+                              IsReadOnly="True" CanUserAddRows="False"
+                              Background="White" BorderBrush="#ccc" BorderThickness="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID testu" Binding="{Binding TestId}" Width="80"/>
+                            <DataGridTextColumn Header="ID pacienta" Binding="{Binding PatientId}" Width="100"/>
+                            <DataGridTextColumn Header="Okres" Binding="{Binding DistrictId}" Width="80"/>
+                            <DataGridTextColumn Header="Kraj" Binding="{Binding RegionId}" Width="80"/>
+                            <DataGridTextColumn Header="Výsledok" Binding="{Binding IsPositive}" Width="80"/>
+                            <DataGridTextColumn Header="Hodnota" Binding="{Binding ResultValue}" Width="80"/>
+                            <DataGridTextColumn Header="Dátum a čas" Binding="{Binding TestDateTime}" Width="150"/>
+                            <DataGridTextColumn Header="Poznámka" Binding="{Binding Note}" Width="200"/>
+                            <DataGridTemplateColumn Header="" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🗑️"
+                                                Command="{Binding DataContext.DeleteTestCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding TestId}"
+                                                Background="#e74c3c" Foreground="White"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Vyhľadávanie">
+                <ScrollViewer Margin="10">
+                    <StackPanel Orientation="Vertical" Background="White">
+
+                        <TextBlock Text="Vyhľadávanie v systéme" FontWeight="Bold" FontSize="16" Margin="0 0 0 10"/>
+
+                        <GroupBox Header="Všeobecné hľadanie" FontWeight="Bold" Margin="0 0 0 10">
+                            <StackPanel Orientation="Vertical">
+                                <WrapPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID testu"/>
+                                        <TextBox Text="{Binding SearchTestId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID pacienta"/>
+                                        <TextBox Text="{Binding SearchPersonId}" />
+                                    </StackPanel>
+                                </WrapPanel>
+
+                                <WrapPanel>
+                                    <Button Content="Nájsť test podľa ID" 
+                                Command="{Binding FindTestByIdCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="180"/>
+                                    <Button Content="Nájsť testy pre pacienta" 
+                                Command="{Binding FindTestsForPatientCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="200"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Hľadanie testov podľa:" FontWeight="Bold" Margin="0 0 0 10">
+                            <StackPanel Orientation="Vertical">
+                                <WrapPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID okresu"/>
+                                        <TextBox Text="{Binding ReportDistrictId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID kraja"/>
+                                        <TextBox Text="{Binding ReportRegionId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID odberného miesta"/>
+                                        <TextBox Text="{Binding ReportPlaceId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="Od dátumu"/>
+                                        <DatePicker SelectedDate="{Binding ReportFromDate}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="Do dátumu"/>
+                                        <DatePicker SelectedDate="{Binding ReportToDate}" />
+                                    </StackPanel>
+                                </WrapPanel>
+
+                                <WrapPanel>
+                                    <Button Content="Nájsť všetky podľa okresu" 
+                                Command="{Binding FindTestsByDistrictCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="200"/>
+                                    <Button Content="Nájsť pozitívne podľa okresu" 
+                                Command="{Binding FindPositiveByDistrictCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
+                                    <Button Content="Nájsť všetky podľa kraja" 
+                                Command="{Binding FindTestsByRegionCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="200"/>
+                                    <Button Content="Nájsť pozitívne podľa kraja" 
+                                Command="{Binding FindPositiveByRegionCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
+                                    <Button Content="Nájsť všetky podľa odberného miesta" 
+                                Command="{Binding FindTestsByPlaceCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
+                                </WrapPanel>
+
+                                <WrapPanel>
+                                    <Button Content="Nájsť všetky" 
+                                Command="{Binding FindTestsByPeriodCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="200"/>
+                                    <Button Content="Nájsť pozitívne" 
+                                Command="{Binding FindPositiveByPeriodCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Hľadanie chorých osôb podľa" FontWeight="Bold" Margin="0 0 0 10">
+                            <StackPanel Orientation="Vertical">
+                                <WrapPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID okresu"/>
+                                        <TextBox Text="{Binding SickDistrictId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="ID kraja"/>
+                                        <TextBox Text="{Binding SickRegionId}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="Dátum"/>
+                                        <DatePicker SelectedDate="{Binding SickDate}" />
+                                    </StackPanel>
+                                    <StackPanel Width="200" Margin="10">
+                                        <TextBlock Text="Trvanie choroby (X dní)"/>
+                                        <TextBox Text="{Binding SickDays}" />
+                                    </StackPanel>
+                                </WrapPanel>
+
+                                <WrapPanel>
+                                    <Button Content="Nájsť chorých v okrese" 
+                                Command="{Binding FindSickByDistrictCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="180"/>
+                                    <Button Content="Nájsť chorých v okrese - utriedené" 
+                                Command="{Binding FindSickByDistrictOrderedCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="260"/>
+                                    <Button Content="Nájsť chorých v kraji" 
+                                Command="{Binding FindSickByRegionCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="180"/>
+                                    <Button Content="Nájsť chorých" 
+                                Command="{Binding FindSickAllCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="160"/>
+                                    <Button Content="Nájsť najchorejších pre okresy" 
+                                Command="{Binding FindTopSickByDistrictCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
+                                </WrapPanel>
+
+                                <WrapPanel>
+                                    <Button Content="Okresy podľa počtu chorých" 
+                                Command="{Binding FindDistrictsBySickCountCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="250"/>
+                                    <Button Content="Kraje podľa počtu chorých" 
+                                Command="{Binding FindRegionsBySickCountCommand}" 
+                                Background="#0078D4" Foreground="White" Margin="10" Width="250"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <TextBlock Text="Výsledky:" FontWeight="Bold" FontSize="15" Margin="0 10 0 5"/>
+                        <DataGrid ItemsSource="{Binding Results}" AutoGenerateColumns="False" Margin="0 10 0 0"
+                      IsReadOnly="True" CanUserAddRows="False" Background="White" BorderBrush="#ccc" BorderThickness="1">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID testu" Binding="{Binding TestId}" Width="80"/>
+                                <DataGridTextColumn Header="ID pacienta" Binding="{Binding PatientId}" Width="100"/>
+                                <DataGridTextColumn Header="Okres" Binding="{Binding DistrictId}" Width="80"/>
+                                <DataGridTextColumn Header="Kraj" Binding="{Binding RegionId}" Width="80"/>
+                                <DataGridTextColumn Header="Výsledok" Binding="{Binding IsPositive}" Width="80"/>
+                                <DataGridTextColumn Header="Hodnota" Binding="{Binding ResultValue}" Width="100"/>
+                                <DataGridTextColumn Header="Dátum a čas" Binding="{Binding TestDateTime}" Width="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>
