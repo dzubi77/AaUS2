@@ -83,41 +83,40 @@
          */
         public List<T> FindAll(T min, T max)
         {
-            List<T> list = new List<T>();
-            LinkedList<BSTNode> stack = new LinkedList<BSTNode>();
-            var current = Root;
-            while (stack.Count > 0 || current != null)
+            List<T> result = new List<T>();
+            if (Root == null)
             {
-                while (current != null)
-                {
-                    // if current is within range, check left subtree, else check right subtree
-                    if (current.Data.CompareTo(min) >= 0)
-                    {
-                        stack.AddLast(current);
-                        current = current.Left;
-                    }
-                    else
-                    {
-                        current = current.Right;
-                    }
-                }
-
-                if (stack.Count == 0) break;
-
-                current = stack.Last!.Value;
-                stack.RemoveLast();
-
-                // add valid value to final list
-                if (current.Data.CompareTo(min) >= 0 && current.Data.CompareTo(max) <= 0)
-                {
-                    list.Add(current.Data);
-                }
-
-                // if current value is less than max, check right subtree
-                current = current.Data.CompareTo(max) < 0 ? current.Right : null;
+                return result;
             }
 
-            return list;
+            BSTNode? current = Root;
+            BSTNode? startingNode = null;
+            while (current != null)
+            {
+                int cmp = current.Data.CompareTo(min);
+                if (cmp >= 0)
+                {
+                    startingNode = current;
+                    current = current.Left;
+                }
+                else
+                {
+                    current = current.Right;
+                }
+            }
+
+            current = startingNode;
+            while (current != null && current.Data.CompareTo(max) <= 0)
+            {
+                if (current.Data.CompareTo(min) >= 0)
+                {
+                    result.Add(current.Data);
+                }
+
+                current = FindNextInOrder(current);
+            }
+
+            return result;
         }
 
         /**
@@ -312,6 +311,15 @@
         }
 
         /**
+         * Checks if param node is left son.
+         */
+        protected bool IsRightSon(BSTNode node)
+        {
+            var parent = node.Parent;
+            return parent != null && parent.Right == node;
+        }
+
+        /**
          * Calculates degree of the param node.
          */
         private int Degree(BSTNode node)
@@ -320,6 +328,46 @@
             if (node.Left != null) result++;
             if (node.Right != null) result++;
             return result;
+        }
+
+        private BSTNode? FindPrevInOrder(BSTNode node)
+        {
+            if (node.Left != null)
+            {
+                node = node.Left;
+                while (node.Right != null)
+                {
+                    node = node.Right;
+                }
+
+                return node;
+            }
+
+            while (node.Parent != null && IsLeftSon(node))
+            {
+                node = node.Parent;
+            }
+            return node.Parent;
+        }
+
+        private BSTNode? FindNextInOrder(BSTNode node)
+        {
+            if (node.Right != null)
+            {
+                node = node.Right;
+                while (node.Left != null)
+                {
+                    node = node.Left;
+                }
+
+                return node;
+            }
+
+            while (node.Parent != null && IsRightSon(node))
+            {
+                node = node.Parent;
+            }
+            return node.Parent;
         }
     }
 }

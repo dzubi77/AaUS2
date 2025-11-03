@@ -1,4 +1,5 @@
-﻿using AaUS2.data_classes;
+﻿using System.Collections.ObjectModel;
+using AaUS2.data_classes;
 using AaUS2.data_classes.wrappers;
 using AaUS2.structures;
 
@@ -21,13 +22,19 @@ namespace AaUS2
         public void InsertPcr(PcrTest test)
         {
             PcrById pcr = new PcrById(test);
-            Tests.Insert(pcr);
-            TestsByDistrict.Insert(new PcrByDistrict(test));
-            TestsByRegion.Insert(new PcrByRegion(test));
+            PcrByDate pcrByDate = new PcrByDate(test);
 
             var personDummy = new Person(test.PatientId);
             var patient = Patients.Find(personDummy);
-            patient.Tests.Insert(pcr); 
+            patient.Tests.Insert(pcr);
+            patient.TestsByDate.Insert(pcrByDate); 
+
+            Tests.Insert(pcr);
+            TestsByDate.Insert(pcrByDate);
+
+            TestsByDistrict.Insert(new PcrByDistrict(test));
+            TestsByRegion.Insert(new PcrByRegion(test));
+            TestsByPlace.Insert(new PcrByPlace(test));
         }
 
         // 2
@@ -41,48 +48,81 @@ namespace AaUS2
         }
         
         // 3
-        public List<PcrById> FindAllPatientTests(string patientId)
+        public ReadOnlyCollection<PcrByDate> FindAllPatientTests(string patientId)
         {
             var personDummy = new Person(patientId);
             var patient = Patients.Find(personDummy);
-            List<PcrById> tests = new List<PcrById>(patient.Tests.Size);
-            patient.Tests.ProcessInOrder(patient.Tests.Root, (n) => tests.Add(n.Data));
-            // sort tests, or add tree to patient (sorted by date)
-            return tests;
-        }
+            var tree = patient.TestsByDate;
+            List<PcrByDate> tests = new List<PcrByDate>(patient.Tests.Size);
+            tree.ProcessInOrder(tree.Root, (n) => tests.Add(n.Data));
+            return tests.AsReadOnly(); 
+        } 
         
         // 4
-        public void FindPositiveTestsForDistrict() {}
+        public ReadOnlyCollection<PcrByDistrict> FindPositiveTestsForDistrict(int districtId, DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
         
         // 5
-        public void FindAllTestsForDistrict() {}
+        public ReadOnlyCollection<PcrByDistrict> FindAllTestsForDistrict(int districtId, DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
         
         // 6
-        public void FindPositiveTestsForRegion() {}
+        public ReadOnlyCollection<PcrByRegion> FindPositiveTestsForRegion(int regionId, DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
         
         // 7
-        public void FindAllTestsForRegion() {}
+        public ReadOnlyCollection<PcrByRegion> FindAllTestsForRegion(int regionId, DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
 
         // 8
-        public void FindPositiveTestsWithin() {}
+        public ReadOnlyCollection<PcrByDate> FindPositiveTestsWithin(DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
 
         // 9
-        public void FindAllTestsWithin() {}
+        public ReadOnlyCollection<PcrByDate> FindAllTestsWithin(DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        } 
 
         // 10
-        public void FindPatientsByDistrict() {}
+        public ReadOnlyCollection<Person> FindPatientsByDistrict(int x, int districtId, DateOnly currentDate)
+        {
+            throw new NotImplementedException();
+        }
 
         // 11
-        public void FindAndSortPatientsByDistrict() {}
+        public ReadOnlyCollection<Person> FindAndSortPatientsByDistrict(int x, int districtId, DateOnly currentDate)
+        {
+            throw new NotImplementedException();
+        }
 
         // 12
-        public void FindPatientsByRegion() {}
+        public ReadOnlyCollection<Person> FindPatientsByRegion(int x, int regionId, DateOnly currentDate)
+        {
+            throw new NotImplementedException();
+        }
 
         // 13
-        public void FindAllPatientsWithin() {}
+        public ReadOnlyCollection<Person> FindAllPatientsWithin(int x, DateOnly currentDate)
+        {
+            throw new NotImplementedException();
+        }
 
         // 14
-        public void FindMostIllPatient() {}
+        public Person FindMostIllPatient(int x, DateOnly currentDate)
+        {
+            throw new NotImplementedException(); 
+        }
 
         // 15
         public void SortDistrictsByIll() {}
@@ -91,24 +131,59 @@ namespace AaUS2
         public void SortRegionsByIll() {}
 
         // 17
-        public void FindAllTestsByPlace() {}
+        public ReadOnlyCollection<PcrByPlace> FindAllTestsByPlace(int placeId, DateOnly dateFrom, DateOnly dateTo)
+        {
+            throw new NotImplementedException();
+        }
 
         // 18
-        public void FindPcrByCode() {}
+        public PcrTest FindPcrByCode(int testId)
+        {
+            throw new NotImplementedException();
+        }
 
         // 19
-        public void InsertPerson() {}
+        public void InsertPerson(Person person)
+        {
+            Patients.Insert(person); 
+        }
 
         // 20
         public void RemovePcr(int testId)
         {
-            var tmp = new PcrTest(testId);
-            Tests.Remove(new PcrById(tmp));
-            TestsByDistrict.Remove(new PcrByDistrict(tmp));
-            TestsByRegion.Remove(new PcrByRegion(tmp));
+            var testDummy = new PcrTest(testId);
+            var testToRemove = Tests.Find(new PcrById(testDummy));
+            var testByDateToRemove = new PcrByDate(testDummy);
+            Tests.Remove(testToRemove);
+            TestsByDistrict.Remove(new PcrByDistrict(testDummy));
+            TestsByRegion.Remove(new PcrByRegion(testDummy));
+            TestsByPlace.Remove(new PcrByPlace(testDummy));
+            TestsByDate.Remove(testByDateToRemove);
+
+            var patient = Patients.Find(new Person(testToRemove.Test.PatientId));
+            patient.Tests.Remove(testToRemove);
+            patient.TestsByDate.Remove(testByDateToRemove);
         }
 
         // 21
-        public void RemovePerson() {}
+        public void RemovePerson(string patientId)
+        {
+            var patient = Patients.Find(new Person(patientId));
+            var testTree = patient.Tests;
+            var testTreeByDate = patient.TestsByDate;
+            testTree.ProcessInOrder(testTree.Root, (n) =>
+                {
+                    var t = n.Data.Test;
+                    Tests.Remove(new PcrById(t));
+                    TestsByDistrict.Remove(new PcrByDistrict(t));
+                    TestsByRegion.Remove(new PcrByRegion(t));
+                    TestsByPlace.Remove(new PcrByPlace(t));
+                    TestsByDate.Remove(new PcrByDate(t));  
+                });
+            testTreeByDate.ProcessInOrder(testTreeByDate.Root, (n) =>
+                {
+
+                });
+        }
     }
 }
