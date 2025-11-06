@@ -19,6 +19,7 @@ namespace AaUS2_WPF
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new ViewModel();
         }
     }
 }

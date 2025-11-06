@@ -52,46 +52,111 @@ namespace AaUS2
         {
             var personDummy = new Person(patientId);
             var patient = Patients.Find(personDummy);
+            var result = new ObservableCollection<PcrByDate>();
+
+            if (patient == null || patient.TestsByDate == null || patient.TestsByDate.Root == null)
+                return result;
+
             var tree = patient.TestsByDate;
-            List<PcrByDate> tests = new List<PcrByDate>(patient.Tests.Size);
-            tree.ProcessInOrder(tree.Root, (n) => tests.Add(n.Data));
-            throw new NotImplementedException();
+            tree.ProcessInOrder(tree.Root, (n) =>
+                {
+                    if (n?.Data != null)
+                        result.Add(n.Data);
+                });
+
+            return result;
         }
 
         // 4
         public ObservableCollection<PcrByDistrict> FindPositiveTestsForDistrict(int districtId, DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, districtId, from.ToDateTime(TimeOnly.MinValue));
+            var maxTest = new PcrTest(0, districtId, to.ToDateTime(TimeOnly.MaxValue));
+
+            var min = new PcrByDistrict(minTest);
+            var max = new PcrByDistrict(maxTest);
+
+            var inRange = TestsByDistrict.FindAll(min, max);
+
+            var result = new ObservableCollection<PcrByDistrict>(
+                inRange.Where(p => p.Test.IsPositive));
+
+            return result;
         }
 
         // 5
         public ObservableCollection<PcrByDistrict> FindAllTestsForDistrict(int districtId, DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, districtId, from.ToDateTime(TimeOnly.MinValue));
+            var maxTest = new PcrTest(0, districtId, to.ToDateTime(TimeOnly.MaxValue));
+
+            var min = new PcrByDistrict(minTest);
+            var max = new PcrByDistrict(maxTest);
+
+            var inRange = TestsByDistrict.FindAll(min, max);
+
+            return new ObservableCollection<PcrByDistrict>(inRange);
         }
 
         // 6
         public ObservableCollection<PcrByRegion> FindPositiveTestsForRegion(int regionId, DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, regionId, from.ToDateTime(TimeOnly.MinValue), true);
+            var maxTest = new PcrTest(0, regionId, to.ToDateTime(TimeOnly.MaxValue), true);
+
+            var min = new PcrByRegion(minTest);
+            var max = new PcrByRegion(maxTest);
+
+            var inRange = TestsByRegion.FindAll(min, max);
+
+            var result = new ObservableCollection<PcrByRegion>(inRange.Where(p => p.Test.IsPositive));
+
+            return result;
         }
 
         // 7
         public ObservableCollection<PcrByRegion> FindAllTestsForRegion(int regionId, DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, regionId, from.ToDateTime(TimeOnly.MinValue), true);
+            var maxTest = new PcrTest(0, regionId, to.ToDateTime(TimeOnly.MaxValue), true);
+
+            var min = new PcrByRegion(minTest);
+            var max = new PcrByRegion(maxTest);
+
+            var inRange = TestsByRegion.FindAll(min, max);
+
+            var result = new ObservableCollection<PcrByRegion>(inRange);
+            return result;
         }
 
         // 8
         public ObservableCollection<PcrByDate> FindPositiveTestsWithin(DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, from.ToDateTime(TimeOnly.MinValue));
+            var maxTest = new PcrTest(0, to.ToDateTime(TimeOnly.MaxValue));
+
+            var min = new PcrByDate(minTest);
+            var max = new PcrByDate(maxTest);
+
+            var inRange = TestsByDate.FindAll(min, max);
+
+            var result = new ObservableCollection<PcrByDate>(inRange.Where(p => p.Test.IsPositive));
+
+            return result;
         }
 
         // 9
         public ObservableCollection<PcrByDate> FindAllTestsWithin(DateOnly from, DateOnly to)
         {
-            throw new NotImplementedException();
+            var minTest = new PcrTest(0, from.ToDateTime(TimeOnly.MinValue));
+            var maxTest = new PcrTest(0, to.ToDateTime(TimeOnly.MaxValue));
+
+            var min = new PcrByDate(minTest);
+            var max = new PcrByDate(maxTest);
+
+            var inRange = TestsByDate.FindAll(min, max);
+
+            return new ObservableCollection<PcrByDate>(inRange);
         }
 
         // 10

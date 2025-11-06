@@ -18,8 +18,14 @@ namespace AaUS2.data_classes
         public Person(string personId) : this(personId, "", "") {}
 
         public int CompareTo(Person? other)
-        { 
-            throw new NotImplementedException();
+        {
+            if (other == null)
+            {
+                return 1;
+            }
+
+            int idCmp = string.Compare(PersonId, other.PersonId, StringComparison.Ordinal);
+            return idCmp;
         }
 
         /**

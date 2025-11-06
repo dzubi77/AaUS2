@@ -5,7 +5,6 @@
         public PcrTest Test { get; } = test;
 
 
-
         public int CompareTo(PcrByDate? other)
         {
             throw new NotImplementedException();

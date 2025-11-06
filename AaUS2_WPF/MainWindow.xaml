@@ -35,15 +35,12 @@
                         <TextBlock Text="Priezvisko:"/>
                         <TextBox Text="{Binding NewPersonLastName}" Margin="0 0 0 8"/>
 
-                        <TextBlock Text="Dátum narodenia:"/>
-                        <DatePicker SelectedDate="{Binding NewPersonBirthDate}" Margin="0 0 0 8"/>
-
                         <Button Content="Uložiť údaje" 
                                 Command="{Binding InsertPersonCommand}" 
                                 Background="#0078D4" Foreground="White" Margin="0 10 0 0" Height="35"/>
                     </StackPanel>
 
-                    <DataGrid Grid.Column="1" ItemsSource="{Binding Persons}" 
+                    <DataGrid Grid.Column="1" ItemsSource="{Binding People}" 
                               AutoGenerateColumns="False" Margin="15,0,0,0"
                               IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column"
                               Background="White" BorderBrush="#ccc" BorderThickness="1">
