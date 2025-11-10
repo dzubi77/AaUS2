@@ -9,7 +9,12 @@
 
         public int CompareTo(PcrByDistrict? other)
         {
-            throw new NotImplementedException();
+            if (other == null) return 1;
+
+            int cmp = Test.DistrictId.CompareTo(other.Test.DistrictId);
+            if (cmp != 0) return cmp;
+
+            return Test.TestId.CompareTo(other.Test.TestId);
         }
     }
 }

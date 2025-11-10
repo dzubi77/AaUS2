@@ -6,7 +6,12 @@
 
         public int CompareTo(PcrByPlace? other)
         {
-            throw new NotImplementedException();
+            if (other == null) return 1;
+
+            int placeComparison = Test.PlaceId.CompareTo(other.Test.PlaceId);
+            if (placeComparison != 0) return placeComparison;
+            
+            return Test.TestId.CompareTo(other.Test.TestId);
         }
     }
 }

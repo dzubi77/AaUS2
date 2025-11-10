@@ -6,7 +6,8 @@
 
         public int CompareTo(PcrById? other)
         {
-            throw new NotImplementedException();
+            if (other == null) return 1; 
+            return Test.TestId.CompareTo(other.Test.TestId);
         }
     }
 }

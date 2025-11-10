@@ -9,7 +9,12 @@
 
         public int CompareTo(PcrByRegion? other)
         {
-            throw new NotImplementedException();
+            if (other == null) return 1;
+
+            int cmp = Test.RegionId.CompareTo(other.Test.RegionId);
+            if (cmp != 0) return cmp;
+
+            return Test.TestId.CompareTo(other.Test.TestId);
         }
     }
 }
