@@ -1,14 +1,16 @@
 ﻿using AaUS2.data_classes;
+using System.Collections.ObjectModel;
 
 namespace AaUS2
 {
     public class Generator(int seed)
     {
         public Random Rng { get; } = new(seed);
-        public List<string> Ids { get; } = new();
-        public List<int> Regions { get; } = new();
-        public List<int> Districts { get; } = new();
-        public List<int> Places { get; } = new();
+        public ObservableCollection<string> Ids { get; } = new();
+
+        public ObservableCollection<int> Regions { get; } = new();
+        public ObservableCollection<int> Districts { get; } = new();
+        public ObservableCollection<int> Places { get; } = new();
 
         // Udaje pre tieto dva atributy boli vygenerovane umelou inteligenciou.
         private readonly string[] FirstNames =
@@ -47,18 +49,30 @@ namespace AaUS2
 
         public PcrTest GeneratePcrTest()
         {
-            if (!Regions.Any() || !Districts.Any() || !Places.Any() || !Ids.Any())
-                throw new InvalidOperationException("Generátor potrebuje aspoň jeden región, okres, miesto a osobu.");
+            if (!Districts.Any() || !Places.Any() || !Ids.Any())
+                throw new InvalidOperationException("Generátor potrebuje aspoň jeden okres, miesto a osobu.");
 
             int testId = Rng.Next(1000, 9999);
-            int regionId = Regions[Rng.Next(Regions.Count)];
-            int districtId = Districts[Rng.Next(Districts.Count)];
-            int placeId = Places[Rng.Next(Places.Count)];
+
+            int districtIndex = Rng.Next(Districts.Count);
+            int districtId = Districts[districtIndex];
+
+            int districtsPerRegion = Districts.Count / Regions.Count;
+            int regionId = ((districtId - 1) / districtsPerRegion) + 1;
+
+            int placesPerDistrict = Places.Count / Districts.Count;
+            int placeStartIndex = districtIndex * placesPerDistrict;
+            int placeEndIndex = Math.Min(placeStartIndex + placesPerDistrict, Places.Count); 
+            int placeId = Places[Rng.Next(placeStartIndex, placeEndIndex)];
+
+            string patientId = Ids[Rng.Next(Ids.Count)];
+
             bool isPositive = Rng.NextDouble() < 0.2;
             double resultValue = Math.Round(Rng.NextDouble() * 10, 2);
-            string patientId = Ids[Rng.Next(Ids.Count)];
             string note = "Generovaný test";
-            DateTime testDateTime = DateTime.Now.AddDays(-Rng.Next(0, 30)).AddHours(Rng.Next(0, 24));
+            DateTime testDateTime = DateTime.Now.AddDays(-Rng.Next(0, 30))
+                .AddHours(Rng.Next(0, 24))
+                .AddMinutes(Rng.Next(0, 60));
 
             return new PcrTest(testId, placeId, regionId, districtId, isPositive, resultValue, patientId, note, testDateTime);
         }

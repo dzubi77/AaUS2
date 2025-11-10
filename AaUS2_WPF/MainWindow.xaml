@@ -63,25 +63,27 @@
 
                                 <WrapPanel Margin="0 0 0 10">
                                     <StackPanel Width="180" Margin="10">
-                                        <TextBlock Text="ID pacienta (rodné číslo)"/>
-                                        <TextBox Text="{Binding NewTestPersonId}" Width="160"/>
+                                        <TextBlock Text="ID pacienta (rodné číslo)" Margin="0 0 0 5"/>
+                                        <ComboBox Width="160"
+                                                  ItemsSource="{Binding PeopleIds}"
+                                                  SelectedItem="{Binding NewTestPatientId, Mode=TwoWay}"/>
                                     </StackPanel>
 
                                     <StackPanel Width="180" Margin="10">
                                         <TextBlock Text="Kraj"/>
-                                        <ComboBox ItemsSource="{Binding RegionIds}" 
+                                        <ComboBox ItemsSource="{Binding RegionIds, Mode=TwoWay}" 
                           SelectedItem="{Binding SelectedRegionId}" Width="160"/>
                                     </StackPanel>
 
                                     <StackPanel Width="180" Margin="10">
                                         <TextBlock Text="Okres"/>
-                                        <ComboBox ItemsSource="{Binding DistrictIds}" 
+                                        <ComboBox ItemsSource="{Binding DistrictIds, Mode=TwoWay}" 
                           SelectedItem="{Binding SelectedDistrictId}" Width="160"/>
                                     </StackPanel>
 
                                     <StackPanel Width="180" Margin="10">
                                         <TextBlock Text="Odberné miesto"/>
-                                        <ComboBox ItemsSource="{Binding PlaceIds}" 
+                                        <ComboBox ItemsSource="{Binding PlaceIds, Mode=TwoWay}" 
                           SelectedItem="{Binding SelectedPlaceId}" Width="160"/>
                                     </StackPanel>
                                 </WrapPanel>
@@ -116,7 +118,7 @@
                                 </WrapPanel>
 
                                 <Button Content="Uložiť test" 
-                Command="{Binding InsertPcrCommand}" 
+                Command="{Binding InsertTestCommand}" 
                 Background="#0078D4" Foreground="White" Width="120" Height="35"/>
                             </StackPanel>
                         </GroupBox>
@@ -161,10 +163,15 @@
 
                         <DataGrid ItemsSource="{Binding Results}" AutoGenerateColumns="False" CanUserAddRows="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Osoba ID" Binding="{Binding PersonId}" Width="*"/>
+                                <DataGridTextColumn Header="ID testu" Binding="{Binding TestId}" Width="*"/>
+                                <DataGridTextColumn Header="ID pacienta" Binding="{Binding PatientId}" Width="*"/>
                                 <DataGridTextColumn Header="Dátum" Binding="{Binding Date}" Width="*"/>
-                                <DataGridTextColumn Header="Výsledok" Binding="{Binding Result}" Width="*"/>
+                                <DataGridTextColumn Header="Výsledok" Binding="{Binding ResultValue}" Width="*"/>
+                                <DataGridTextColumn Header="Pozitívny" Binding="{Binding IsPositive}" Width="*"/>
+                                <DataGridTextColumn Header="Kraj" Binding="{Binding RegionId}" Width="*"/>
+                                <DataGridTextColumn Header="Okres" Binding="{Binding DistrictId}" Width="*"/>
                                 <DataGridTextColumn Header="Miesto" Binding="{Binding PlaceId}" Width="*"/>
+                                <DataGridTextColumn Header="Poznámka" Binding="{Binding Note}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -245,10 +252,10 @@
                                 </WrapPanel>
 
                                 <WrapPanel>
-                                    <Button Content="Nájsť všetky" 
+                                    <Button Content="Nájsť všetky od do" 
                     Command="{Binding FindTestsByPeriodCommand}" 
                     Background="#0078D4" Foreground="White" Margin="10" Width="200"/>
-                                    <Button Content="Nájsť pozitívne" 
+                                    <Button Content="Nájsť pozitívne od do" 
                     Command="{Binding FindPositiveByPeriodCommand}" 
                     Background="#0078D4" Foreground="White" Margin="10" Width="220"/>
                                 </WrapPanel>

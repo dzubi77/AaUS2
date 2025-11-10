@@ -3,6 +3,7 @@ using AaUS2.data_classes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection.Emit;
+using System.Windows;
 using System.Windows.Input;
 
 namespace AaUS2_WPF
@@ -43,13 +44,40 @@ namespace AaUS2_WPF
         public ObservableCollection<int> RegionIds { get; set; } = new();
         public ObservableCollection<int> DistrictIds { get; set; } = new();
         public ObservableCollection<int> PlaceIds { get; set; } = new();
+        public ObservableCollection<string> PeopleIds => generator.Ids; 
 
         // Generator inputs
-        public int GeneratePersonCount { get; set; }
+        public int GeneratePeopleCount
+        {
+            get => _generatePeopleCount;
+            set
+            {
+                if (value != _generatePeopleCount)
+                {
+                    _generatePeopleCount = value;
+                    OnPropertyChanged(nameof(GeneratePeopleCount));
+                }
+            }
+        }
+        private int _generatePeopleCount;
+
+        public int GenerateTestCount
+        {
+            get => _generateTestCount;
+            set
+            {
+                if (value != _generateTestCount)
+                {
+                    _generateTestCount = value;
+                    OnPropertyChanged(nameof(GenerateTestCount));
+                }
+            }
+        }
+        private int _generateTestCount;
+
         public int GenerateRegionCount { get; set; }
         public int GenerateDistrictCount { get; set; }
         public int GeneratePlaceCount { get; set; }
-        public int GenerateTestCount { get; set; }
 
         // Selected for Test insertion
         public int SelectedRegionId { get; set; }
@@ -65,8 +93,7 @@ namespace AaUS2_WPF
         private string _newPersonLastName;
 
         // Test form inputs
-        public int NewTestId { get => _newTestId; set { _newTestId = value; OnPropertyChanged(nameof(NewTestId)); } }
-        private int _newTestId;
+        private int _newTestId = 1000;
         public string NewTestPatientId { get => _newTestPatientId; set { _newTestPatientId = value; OnPropertyChanged(nameof(NewTestPatientId)); } }
         private string _newTestPatientId;
         public double NewTestResultValue { get => _newTestResultValue; set { _newTestResultValue = value; OnPropertyChanged(nameof(NewTestResultValue)); } }
@@ -176,11 +203,13 @@ namespace AaUS2_WPF
             var person = new Person(NewPersonId, NewPersonFirstName, NewPersonLastName);
             core.InsertPerson(person);
             People.Add(person);
-        }
+            PeopleIds.Add(NewPersonId);
+        } 
 
         private void DeletePerson(string id)
         {
             if (string.IsNullOrEmpty(id)) return;
+            PeopleIds.Remove(id);
             core.RemovePerson(id);
             var person = People.FirstOrDefault(p => p.PersonId == id);
             if (person != null) People.Remove(person);
@@ -192,7 +221,7 @@ namespace AaUS2_WPF
             var time = TimeOnly.TryParse(NewTestTime, out var parsedTime) ? parsedTime : TimeOnly.MinValue;
             var dateTime = date.Date + time.ToTimeSpan();
 
-            var test = new PcrTest(NewTestId, SelectedPlaceId, SelectedRegionId, SelectedDistrictId,
+            var test = new PcrTest(_newTestId++, SelectedPlaceId, SelectedRegionId, SelectedDistrictId,
                 NewTestIsPositive, NewTestResultValue, NewTestPatientId, NewTestNote, dateTime);
 
             core.InsertPcr(test);
@@ -206,7 +235,7 @@ namespace AaUS2_WPF
 
         private void GeneratePeople()
         {
-            var newPeople = generator.GeneratePeople(GeneratePersonCount);
+            var newPeople = generator.GeneratePeople(GeneratePeopleCount);
             foreach (var p in newPeople)
             {
                 core.InsertPerson(p);
